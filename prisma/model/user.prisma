@@ -5,4 +5,5 @@ model User {
   name        String
   isConfirmed Boolean  @default(false)
   createdAt   DateTime @default(now())
+  tokens      Token[]
 }

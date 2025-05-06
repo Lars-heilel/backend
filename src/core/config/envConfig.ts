@@ -23,5 +23,12 @@ export const envSchema = z.object({
     EMAIL_TOKEN_EXPIRES: z.string(),
     PASSWORD_RESET_EXPIRES: z.string(),
 });
+envSchema.parse(process.env);
 
 export type Env = z.infer<typeof envSchema>;
+
+declare global {
+    namespace NodeJS {
+        interface ProcessEnv extends z.infer<typeof envSchema> {}
+    }
+}
