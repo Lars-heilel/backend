@@ -11,7 +11,6 @@ services:
             - '5432:5432'
         networks:
             - app_network
-        restart: unless-stopped
 
     pgadmin:
         image: dpage/pgadmin4
@@ -35,7 +34,6 @@ services:
             - redis_data:/data
         networks:
             - app_network
-        restart: unless-stopped
 
 volumes:
     postgres_data:
