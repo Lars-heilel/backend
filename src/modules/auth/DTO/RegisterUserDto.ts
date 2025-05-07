@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { PasswordRegex } from 'src/common/const/Password_validation_regex';
 import { z } from 'zod';
 
@@ -9,3 +10,8 @@ export const RegisterSchema = z.object({
         .regex(PasswordRegex.REGEX, PasswordRegex.MESSAGE)
         .min(PasswordRegex.MIN_LENGTH),
 });
+export class RegisterDto extends createZodDto(RegisterSchema) {
+    email: string;
+    name: string;
+    password: string;
+}

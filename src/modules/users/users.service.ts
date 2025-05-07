@@ -2,9 +2,12 @@ import {
     ConflictException,
     Injectable,
     NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { BcryptService } from '../security/bcrypt/bcrypt.service';
+import { User } from 'prisma/generated';
+import { RegisterDto } from '../auth/DTO/RegisterUserDto';
 
 const userSelectFields = {
     email: true,
@@ -21,32 +24,35 @@ export class UsersService {
         private bcrypt: BcryptService,
     ) {}
 
-    async createUser(email: string, password: string, name: string) {
+    async createUser(DTO: RegisterDto) {
         const existingUser = await this.prisma.user.findUnique({
-            where: { email },
+            where: { email: DTO.email.toString().toLowerCase() },
         });
         if (existingUser)
             throw new ConflictException(
                 'Пользователь с таким email уже существует',
             );
-        const hashedPassword = await this.bcrypt.hash(password);
+        const hashedPassword = await this.bcrypt.hash(DTO.password);
         const user = this.prisma.user.create({
-            data: { email: email, name: name, password: hashedPassword },
+            data: {
+                email: DTO.email.toString().toLowerCase(),
+                name: DTO.name,
+                password: hashedPassword,
+            },
             select: userSelectFields,
         });
         return user;
     }
     async deleteUser(email: string) {
-        const user = await this.findUserByEmail(email);
+        console.log(email);
         await this.prisma.user.delete({ where: { email: email } });
-        return { success: `Пользователь ${user.email} удален` };
+        return { success: `Пользователь удален` };
     }
     async findUserByEmail(email: string) {
         const user = await this.prisma.user.findUnique({
             where: { email: email },
-            select: userSelectFields,
         });
-        if (!user) throw new NotFoundException('Пользователя не существует');
+
         return user;
     }
     async findUserById(userId: string) {
@@ -54,7 +60,9 @@ export class UsersService {
             where: { id: userId },
             select: userSelectFields,
         });
-        if (!user) throw new NotFoundException('Пользователя не существует');
+        if (!user) {
+            throw new NotFoundException('Пользователь не найден');
+        }
         return user;
     }
     async confirmEmail(userId: string) {
@@ -70,11 +78,31 @@ export class UsersService {
     }
     async updatePassword(email: string, newPassword: string) {
         const user = await this.findUserByEmail(email);
+        if (!user) {
+            throw new NotFoundException('Пользователь не найден');
+        }
         const hashedPassword = await this.bcrypt.hash(newPassword);
         await this.prisma.user.update({
             where: { email: email },
             data: { password: hashedPassword },
         });
         return { success: `Пароль пользователя ${user.email} успешно изменен` };
+    }
+    async validateUser(
+        email: string,
+        password: string,
+    ): Promise<Omit<User, 'password'> | null> {
+        const user = await this.findUserByEmail(email);
+        if (!user)
+            throw new UnauthorizedException('Пользователь не зарегестрирован');
+        const comparePassword = await this.bcrypt.compare(
+            password,
+            user.password,
+        );
+        console.log(comparePassword);
+        if (!comparePassword)
+            throw new UnauthorizedException('Неверный пароль');
+        const { password: _, ...userWithoutPassword } = user;
+        return userWithoutPassword;
     }
 }

@@ -16,19 +16,37 @@ export const envSchema = z.object({
     //bcrypt
     SALT_ROUNDS: z.coerce.number(),
     //FRONTEND
-    CLIENT_URL: z.string().url(),
+    CLIENT_URL: z.string(),
     //Email Verification
-    EMAIL_CONFIRMATION_URL: z.string().url(),
-    PASSWORD_RESET_URL: z.string().url(),
     EMAIL_TOKEN_EXPIRES: z.string(),
     PASSWORD_RESET_EXPIRES: z.string(),
+    //POSTGRESQL
+    POSTGRES_USER: z.string(),
+    POSTGRES_PASSWORD: z.string(),
+    POSTGRES_DB: z.string(),
+    //PGADMIN
+    PGADMIN_DEFAULT_EMAIL: z.string(),
+    PGADMIN_DEFAULT_PASSWORD: z.string(),
 });
-envSchema.parse(process.env);
 
 export type Env = z.infer<typeof envSchema>;
 
 declare global {
     namespace NodeJS {
         interface ProcessEnv extends z.infer<typeof envSchema> {}
+    }
+}
+
+export function validate(config: Record<string, unknown>): Env {
+    try {
+        return envSchema.parse(config);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            const messages = error.issues
+                .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+                .join('\n');
+            throw new Error(`Configuration validation failed:\n${messages}`);
+        }
+        throw new Error('Unknown error during configuration validation');
     }
 }
