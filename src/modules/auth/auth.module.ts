@@ -9,22 +9,24 @@ import { JwtModule } from '@nestjs/jwt';
 import { Env } from 'src/core/config/envConfig';
 import { RefreshTokenModule } from '../security/refresh-token/refresh-token.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EmailModule } from '../security/email/email.module';
 
 @Module({
-    controllers: [AuthController],
-    providers: [AuthService, LocalStrategy, JwtStrategy],
-    imports: [
-        UsersModule,
-        PassportModule,
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            useFactory: async (configService: ConfigService<Env>) => ({
-                secret: configService.get('JWT_SECRET'),
-                signOptions: { expiresIn: configService.get('JWT_EXPIRES') },
-            }),
-            inject: [ConfigService],
-        }),
-        RefreshTokenModule,
-    ],
+  controllers: [AuthController],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
+  imports: [
+    EmailModule,
+    UsersModule,
+    PassportModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService<Env>) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get('JWT_EXPIRES') },
+      }),
+      inject: [ConfigService],
+    }),
+    RefreshTokenModule,
+  ],
 })
 export class AuthModule {}

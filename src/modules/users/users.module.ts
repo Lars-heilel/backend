@@ -5,9 +5,9 @@ import { PrismaModule } from 'prisma/prisma.module';
 import { BcryptModule } from '../security/bcrypt/bcrypt.module';
 
 @Module({
-    controllers: [UsersController],
-    providers: [UsersService],
-    imports: [PrismaModule, BcryptModule],
-    exports: [UsersService],
+  controllers: [UsersController],
+  providers: [UsersService],
+  imports: [PrismaModule, BcryptModule],
+  exports: [UsersService],
 })
 export class UsersModule {}

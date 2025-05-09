@@ -1,42 +1,105 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
+import { Response } from 'express';
 import { PrismaService } from 'prisma/prisma.service';
-import { userRequset } from 'src/modules/auth/types/userRequest';
+import { CreateToken } from 'src/modules/auth/DTO/CreateToken.dto';
 
 @Injectable()
 export class RefreshTokenService {
-    constructor(
-        private prisma: PrismaService,
-        private jwt: JwtService,
-    ) {}
-    async generateRefreshToken(user: userRequset) {
-        const payload = { email: user.email, sub: user.id };
-        const refreshToken = this.jwt.sign(payload);
-        await this.prisma.token.create({
-            data: {
-                refreshToken: refreshToken,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                userId: user.id,
-            },
+  private readonly logger = new Logger(RefreshTokenService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+  ) {}
+
+  async setRefreshTokenCookie(res: Response, token: string) {
+    this.logger.debug('Установка refresh токена в cookie');
+    res.cookie('refreshToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+  }
+
+  async generateRefreshToken(user: CreateToken) {
+    this.logger.log(`Генерация refresh токена для пользователя ID: ${user.id}`);
+    try {
+      const payload = { email: user.email, sub: user.id };
+      const refreshToken = this.jwt.sign(payload);
+
+      await this.prisma.$transaction(async (tx) => {
+        this.logger.debug(`Удаление старых токенов пользователя ID: ${user.id}`);
+        await tx.token.deleteMany({ where: { userId: user.id } });
+
+        this.logger.debug(`Создание нового токена для пользователя ID: ${user.id}`);
+        await tx.token.create({
+          data: {
+            refreshToken: refreshToken,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            userId: user.id,
+          },
         });
-        return refreshToken;
+      });
+
+      this.logger.log(`Успешная генерация refresh токена для пользователя ID: ${user.id}`);
+      return refreshToken;
+    } catch (error) {
+      this.logger.error(`Ошибка генерации токена для пользователя ID: ${user.id}`, error.stack);
+      throw error;
     }
-    async validateRefreshToken(token: string) {
-        const compareToken = this.jwt.verify(token);
-        if (!compareToken) throw new UnauthorizedException('Токен не валиден');
-        const storedToken = await this.prisma.token.findFirst({
-            where: { refreshToken: token },
-        });
-        if (!storedToken) throw new UnauthorizedException('Токен не обнаружен');
-        return storedToken.userId;
+  }
+
+  async validateRefreshToken(token: string) {
+    this.logger.debug(`Валидация токена: ${token.substring(0, 6)}...`);
+    try {
+      await this.jwt.verify(token);
+      const storedToken = await this.prisma.token.findFirst({
+        where: { refreshToken: token },
+      });
+
+      if (!storedToken) {
+        this.logger.warn(`Токен не найден в БД: ${token.substring(0, 6)}...`);
+        throw new UnauthorizedException('Токен не обнаружен');
+      }
+
+      const now = new Date();
+      if (storedToken.expiresAt < now) {
+        this.logger.warn(`Обнаружен просроченный токен пользователя ID: ${storedToken.userId}`);
+        await this.prisma.token.delete({ where: { id: storedToken.id } });
+        throw new UnauthorizedException('Просроченный токен');
+      }
+
+      this.logger.log(`Токен успешно валидирован для пользователя ID: ${storedToken.userId}`);
+      return storedToken.userId;
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        this.logger.warn('Попытка использования просроченного токена');
+        throw new UnauthorizedException('Токен просрочен');
+      }
+      if (error instanceof JsonWebTokenError) {
+        this.logger.warn(`Невалидная подпись токена: ${error.message}`);
+        throw new UnauthorizedException('Невалидная подпись токена');
+      }
+      this.logger.error(
+        `Непредвиденная ошибка при валидации токена: ${error.message}`,
+        error.stack,
+      );
+      throw error;
     }
-    async revokeRefreshToken(token: string) {
-        await this.prisma.token.deleteMany({
-            where: { refreshToken: token },
-        });
+  }
+
+  async revokeRefreshToken(token: string) {
+    this.logger.log(`Отзыв токена: ${token.substring(0, 6)}...`);
+    try {
+      await this.prisma.token.delete({
+        where: { refreshToken: token },
+      });
+      this.logger.debug('Токен успешно отозван');
+    } catch (error) {
+      this.logger.error(`Ошибка при отзыве токена: ${error.message}`, error.stack);
+      throw error;
     }
-    async findAllToken() {
-        const token = await this.prisma.token.findMany();
-        return token;
-    }
+  }
 }
