@@ -1,6 +1,6 @@
 import { EmailStyles } from './EmailStyles';
 export const EmailTemplate = {
-  confirmEmail: (url: string) => `
+    confirmEmail: (url: string) => `
             <div style="${EmailStyles.container}">
                 <h2 style="${EmailStyles.confirmEmail.header}">
                     Подтвердите ваш email
@@ -29,7 +29,7 @@ export const EmailTemplate = {
                 </p>
             </div>
         `,
-  resetPasswordEmail: (url: string) => `
+    resetPasswordEmail: (url: string) => `
                 <div style="${EmailStyles.container}">
                     <h2 style="${EmailStyles.resetPassword.header}">
                         Сброс пароля

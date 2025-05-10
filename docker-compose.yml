@@ -11,6 +11,12 @@ services:
             - '5432:5432'
         networks:
             - app_network
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        restart: unless-stopped
 
     pgadmin:
         image: dpage/pgadmin4
@@ -23,7 +29,9 @@ services:
         networks:
             - app_network
         depends_on:
-            - postgres
+            postgres:
+                condition: service_healthy
+        restart: unless-stopped
 
     redis:
         image: redis:latest
@@ -34,6 +42,12 @@ services:
             - redis_data:/data
         networks:
             - app_network
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        restart: unless-stopped
 
 volumes:
     postgres_data:

@@ -4,9 +4,9 @@ import { User } from 'prisma/generated';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-  @Delete('deleteUser')
-  async deleteUser(@Body() user: User) {
-    return await this.usersService.deleteUser(user.email);
-  }
+    constructor(private readonly usersService: UsersService) {}
+    @Delete('deleteUser')
+    async deleteUser(@Body() user: User) {
+        return await this.usersService.deleteUser(user.email);
+    }
 }

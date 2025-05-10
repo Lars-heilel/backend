@@ -10,21 +10,21 @@ import { RefreshTokenModule } from 'src/modules/security/refresh-token/refresh-t
 import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
-  imports: [
-    CacheModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async () => ({
-        stores: [createKeyv('redis://localhost:6379')],
-      }),
-      isGlobal: true,
-      inject: [ConfigService],
-    }),
-    ConfigModule.forRoot({ isGlobal: true, validate }),
-    PrismaModule,
-    BcryptModule,
-    UsersModule,
-    AuthModule,
-    RefreshTokenModule,
-  ],
+    imports: [
+        CacheModule.registerAsync({
+            imports: [ConfigModule],
+            useFactory: async () => ({
+                stores: [createKeyv('redis://localhost:6379')],
+            }),
+            isGlobal: true,
+            inject: [ConfigService],
+        }),
+        ConfigModule.forRoot({ isGlobal: true, validate }),
+        PrismaModule,
+        BcryptModule,
+        UsersModule,
+        AuthModule,
+        RefreshTokenModule,
+    ],
 })
 export class AppModule {}

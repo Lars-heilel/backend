@@ -1,7 +1,9 @@
 export const $endpoints = {
-  email: { resetPassword: '/aboba', confirmEmail: '/checkYourEmail' },
+    email: {
+        resetPassword: '/reset-password',
+        confirmEmail: '/confirm-email',
+    },
 } as const;
-
 export function $getFrontUrl(endpoints: string) {
-  return `${process.env.CLIENT_URL}${endpoints}`;
+    return `${process.env.CLIENT_URL}${endpoints}`;
 }

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from '../security/refresh-token/refresh-token.service';
 import { userRequset } from './types/userRequest';
@@ -9,35 +9,32 @@ import { CreateToken } from './DTO/CreateToken.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private emailService: EmailService,
-    private userService: UsersService,
-    private jwt: JwtService,
-    private refreshTokenService: RefreshTokenService,
-  ) {}
-  async generateTokens(user: CreateToken) {
-    const payload = { email: user.email, sub: user.id };
-    const refreshToken = await this.refreshTokenService.generateRefreshToken(user);
-    return { access_token: this.jwt.sign(payload), refreshToken };
-  }
-  async register(DTO: RegisterDto) {
-    const exitingUser = await this.userService.findUserByEmail(DTO.email);
-    if (exitingUser) throw new ConflictException('Пользователь уже зарегестрирован');
-    const user = await this.userService.createUser(DTO);
-    console.log(user);
-    await this.emailService.sendConfirmationEmail(user, 'confirm');
-    return {
-      user: user,
-      message: `Для завершения процедуры регистрации проверьте почту: ${user.email}
+    constructor(
+        private emailService: EmailService,
+        private userService: UsersService,
+        private jwt: JwtService,
+        private refreshTokenService: RefreshTokenService,
+    ) {}
+    async generateTokens(user: CreateToken) {
+        const payload = { email: user.email, sub: user.id };
+        const refreshToken = await this.refreshTokenService.generateRefreshToken(user);
+        return { access_token: this.jwt.sign(payload), refreshToken };
+    }
+    async register(DTO: RegisterDto) {
+        const user = await this.userService.createUser(DTO);
+        await this.emailService.sendConfirmationEmail(user, 'confirm');
+        return {
+            user: user,
+            message: `Для завершения процедуры регистрации проверьте почту: ${user.email}
             `,
-    };
-  }
-  async login(user: userRequset) {
-    const token = await this.generateTokens(user);
-    return token;
-  }
-  async logout(token: string) {
-    await this.refreshTokenService.revokeRefreshToken(token);
-    return { message: 'вы вышли из аккаунты' };
-  }
+        };
+    }
+    async login(user: userRequset) {
+        const token = await this.generateTokens(user);
+        return token;
+    }
+    async logout(token: string) {
+        await this.refreshTokenService.revokeRefreshToken(token);
+        return { message: 'вы вышли из аккаунты' };
+    }
 }
