@@ -1,4 +1,4 @@
-export interface userRequset {
+export interface UserRequest {
     email: string;
     id: string;
 }

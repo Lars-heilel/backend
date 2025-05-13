@@ -10,6 +10,7 @@ import { BcryptService } from '../security/bcrypt/bcrypt.service';
 import { User } from 'prisma/generated';
 import { RegisterDto } from '../auth/DTO/RegisterUserDto';
 import { PasswordRegex } from 'src/common/const/Password_validation_regex';
+import { FindUserDTO } from './DTO/findUsers.dto';
 
 const userSelectFields = {
     email: true,
@@ -70,6 +71,12 @@ export class UsersService {
             throw new NotFoundException('Пользователь не найден');
         }
         return user;
+    }
+    async findUsers(user: FindUserDTO) {
+        return await this.prisma.user.findFirst({
+            where: { OR: [{ email: user.email }, { id: user.id }, { name: user.name }] },
+            select: { email: true, name: true, id: true },
+        });
     }
     async confirmEmail(email: string) {
         this.logger.debug(`Начало процесса изменения статуса пользователя ${email} на активен`);

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenService } from '../security/refresh-token/refresh-token.service';
-import { userRequset } from './types/userRequest';
+import { UserRequest } from './types/userRequest';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './DTO/RegisterUserDto';
 import { EmailService } from '../security/email/email.service';
@@ -29,7 +29,7 @@ export class AuthService {
             `,
         };
     }
-    async login(user: userRequset) {
+    async login(user: UserRequest) {
         const token = await this.generateTokens(user);
         return token;
     }

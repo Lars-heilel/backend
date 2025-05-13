@@ -17,7 +17,7 @@ import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
 import { RegisterDto, RegisterSchema } from './DTO/RegisterUserDto';
 import { LoginSchema } from './DTO/LoginUserDto';
 import { LocalAuthGuard } from 'src/common/guards/local-auth.guard';
-import { userRequset } from './types/userRequest';
+import { UserRequest } from './types/userRequest';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { EmailService } from '../security/email/email.service';
 import { UsersService } from '../users/users.service';
@@ -67,7 +67,7 @@ export class AuthController {
     @Post('login')
     @UsePipes(new ZodValidationPipe(LoginSchema))
     @UseGuards(LocalAuthGuard)
-    async login(@Req() req: { user: userRequset }, @Res({ passthrough: true }) res: Response) {
+    async login(@Req() req: { user: UserRequest }, @Res({ passthrough: true }) res: Response) {
         this.logger.debug(`данные из реквеста ${req.user.email},${req.user.id}`);
         const { access_token, refreshToken } = await this.authService.login(req.user);
         await this.refreshTokenService.setRefreshTokenCookie(res, refreshToken);
@@ -76,8 +76,8 @@ export class AuthController {
 
     @Post('logout')
     @UseGuards(JwtAuthGuard)
-    async logout(@Req() req: { user: userRequset }) {
-        this.logger.debug(`Выход`);
+    async logout(@Req() req: { user: UserRequest }) {
+        this.logger.debug(`Выход ${req.user.id},${req.user.email}`);
         await this.refreshTokenService.revokeRefreshToken(req.user.id);
         return { message: 'Вы успешно вышли из системы' };
     }

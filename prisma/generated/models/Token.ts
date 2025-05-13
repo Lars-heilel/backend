@@ -316,14 +316,6 @@ export type TokenOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
-}
-
 export type TokenCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.TokenCreateWithoutUserInput, Prisma.TokenUncheckedCreateWithoutUserInput> | Prisma.TokenCreateWithoutUserInput[] | Prisma.TokenUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.TokenCreateOrConnectWithoutUserInput | Prisma.TokenCreateOrConnectWithoutUserInput[]
