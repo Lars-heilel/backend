@@ -24,8 +24,8 @@ export * as $Enums from './enums.js'
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Friendships
- * const friendships = await prisma.friendship.findMany()
+ * // Fetch zero or more ChatRooms
+ * const chatRooms = await prisma.chatRoom.findMany()
  * ```
  * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
@@ -39,6 +39,11 @@ export { Prisma }
 path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node")
 path.join(process.cwd(), "prisma/generated/libquery_engine-debian-openssl-3.0.x.so.node")
 
+/**
+ * Model ChatRoom
+ * 
+ */
+export type ChatRoom = Prisma.ChatRoomModel
 /**
  * Model Friendship
  * 

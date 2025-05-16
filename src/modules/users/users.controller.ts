@@ -12,7 +12,7 @@ export class UsersController {
         return await this.usersService.deleteUser(user.email);
     }
     @Post('findUser')
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
     async findAllUser(@Body() user: FindUserDTO) {
         return this.usersService.findUsers(user);
     }

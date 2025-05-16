@@ -14,6 +14,7 @@ async function bootstrap() {
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         allowedHeaders: 'Content-Type,Authorization',
     });
+
     await app.listen(env.get('PORT') ?? 3001);
     Logger.log(` Server on http://localhost:${env.get('PORT')}`);
     Logger.log(`PgAdmin http://localhost:8080 `);

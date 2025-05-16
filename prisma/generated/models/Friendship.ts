@@ -346,16 +346,8 @@ export type FriendshipOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
 export type EnumFriendshipStatusFieldUpdateOperationsInput = {
   set?: $Enums.FriendshipStatus
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type FriendshipCreateNestedManyWithoutRequesterInput = {
