@@ -1,40 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { RefreshTokenService } from '../security/refresh-token/refresh-token.service';
-import { UserRequest } from './types/userRequest';
+import { TokensService } from './tokens/tokens.service';
+import { MailsService } from '../mails/mails.service';
 import { UsersService } from '../users/users.service';
-import { RegisterDto } from './DTO/RegisterUserDto';
-import { EmailService } from '../security/email/email.service';
-import { CreateToken } from './DTO/CreateToken.dto';
+import { Response } from 'express';
+import { SafeUser } from '../users/Types/user.types';
+import { JwtPayload } from './tokens/types/jwt-payload';
+import { CreateUserDto } from '../users/DTO/createUser.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private emailService: EmailService,
-        private userService: UsersService,
-        private jwt: JwtService,
-        private refreshTokenService: RefreshTokenService,
+        private tokenService: TokensService,
+        private mailsService: MailsService,
+        private usersService: UsersService,
     ) {}
-    async generateTokens(user: CreateToken) {
-        const payload = { email: user.email, sub: user.id };
-        const refreshToken = await this.refreshTokenService.generateRefreshToken(user);
-        return { access_token: this.jwt.sign(payload), refreshToken };
+
+    async register(DTO: CreateUserDto) {
+        const user = await this.usersService.createUser(DTO);
+        await this.mailsService.sendConfirmationEmail(user);
+        return { success: 'To complete registration, confirm your account via your email' };
     }
-    async register(DTO: RegisterDto) {
-        const user = await this.userService.createUser(DTO);
-        await this.emailService.sendConfirmationEmail(user, 'confirm');
-        return {
-            user: user,
-            message: `Для завершения процедуры регистрации проверьте почту: ${user.email}
-            `,
-        };
+    async login(user: SafeUser, res: Response) {
+        const payload: JwtPayload = { sub: user.id, email: user.email };
+        const { access_token, refresh_token } = await this.tokenService.createTokens(payload);
+        await this.tokenService.setRefreshTokenCookie(res, refresh_token);
+        return access_token;
     }
-    async login(user: UserRequest) {
-        const token = await this.generateTokens(user);
-        return token;
+    async logout(userId: string) {
+        await this.tokenService.revokeRefreshToken(userId);
+        return { message: 'logout successful' };
     }
-    async logout(token: string) {
-        await this.refreshTokenService.revokeRefreshToken(token);
-        return { message: 'вы вышли из аккаунты' };
+    async refresh(token: string, res: Response) {
+        const payload = await this.tokenService.validateRefreshToken(token);
+        const { access_token, refresh_token } = await this.tokenService.createTokens(payload);
+        await this.tokenService.setRefreshTokenCookie(res, refresh_token);
+        return access_token;
     }
 }

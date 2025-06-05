@@ -2,100 +2,167 @@ import {
     ConflictException,
     ForbiddenException,
     Injectable,
+    InternalServerErrorException,
     Logger,
     NotFoundException,
-    UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { FriendshipRepositoryAbstract } from './repo/friendship.repository.abstract';
 
 @Injectable()
 export class FriendshipService {
     private readonly logger = new Logger(FriendshipService.name);
-    constructor(private prisma: PrismaService) {}
+
+    constructor(private readonly repository: FriendshipRepositoryAbstract) {}
+
     async sendRequest(requesterId: string, addresseeId: string) {
-        this.logger.debug(`Создание запроса на дружбу между пользователями:
-                [отправитель: ${requesterId.substring(0, 10)},адресат:${addresseeId.substring(0, 10)}
-        ]`);
-        if (requesterId === addresseeId)
-            throw new ConflictException('Нельзя отправить запрос себе');
-        const existingRequest = await this.prisma.friendship.findFirst({
-            where: {
-                OR: [
-                    { requesterId: requesterId, addresseeId: addresseeId },
-                    { requesterId: addresseeId, addresseeId: requesterId },
-                ],
-            },
-        });
-        this.logger.log(
-            `Проверка есть ли уже запрос ${JSON.stringify(existingRequest).toString().substring(0, 20)}`,
-        );
-        if (existingRequest?.status === 'PENDING') {
-            throw new ConflictException('Запрос на дружбу уже существует');
+        this.logger.debug(`Sending friend request from ${requesterId} to ${addresseeId}`);
+
+        try {
+            if (requesterId === addresseeId) {
+                this.logger.warn(`Self-request attempt by ${requesterId}`);
+                throw new ConflictException('Cannot send request to yourself');
+            }
+
+            this.logger.verbose(
+                `Checking existing requests between ${requesterId} and ${addresseeId}`,
+            );
+            const existingRequests = await this.repository.findExistingRequests(
+                requesterId,
+                addresseeId,
+            );
+
+            const activeRequest = existingRequests.find((r) => r.status === 'PENDING');
+            if (activeRequest) {
+                this.logger.warn(`Active request already exists (ID: ${activeRequest.id})`);
+                throw new ConflictException('Friend request already exists');
+            }
+
+            if (existingRequests.some((r) => r.status === 'ACCEPTED')) {
+                this.logger.warn(
+                    `Friendship already exists between ${requesterId} and ${addresseeId}`,
+                );
+                throw new ConflictException('Already friends');
+            }
+
+            this.logger.verbose(`Creating new friend request`);
+            const request = await this.repository.createRequest(requesterId, addresseeId);
+
+            this.logger.log(
+                `Friend request created (ID: ${request.id}) from ${requesterId} to ${addresseeId}`,
+            );
+            return request;
+        } catch (error) {
+            this.logger.error(`Failed to send friend request`, {
+                requesterId,
+                addresseeId,
+                error: error.message,
+            });
+
+            if (error instanceof ConflictException) throw error;
+            throw new InternalServerErrorException('Friend request failed');
         }
-        if (existingRequest?.status === 'ACCEPTED')
-            throw new ConflictException('Запрос уже принят');
-        const friendRequest = await this.prisma.friendship.create({
-            data: { requesterId: requesterId, addresseeId: addresseeId, status: 'PENDING' },
-        });
-        this.logger.log(`Запрос отправлен ${JSON.stringify(friendRequest)}`);
-        return friendRequest;
     }
+
     async incomingRequest(userId: string) {
-        return this.prisma.friendship.findMany({
-            where: { addresseeId: userId, status: 'PENDING' },
-        });
+        this.logger.debug(`Fetching incoming requests for user: ${userId}`);
+
+        try {
+            const requests = await this.repository.getIncomingRequests(userId);
+            this.logger.verbose(`Found ${requests.length} incoming requests for ${userId}`);
+            return requests;
+        } catch (error) {
+            this.logger.error(`Failed to fetch incoming requests for ${userId}`, {
+                error: error.message,
+            });
+            throw new InternalServerErrorException('Failed to load requests');
+        }
     }
+
     async updateFriendshipStatus(
         friendshipId: string,
         userId: string,
         type: 'ACCEPTED' | 'REJECTED',
     ) {
-        this.logger.debug(
-            `Изменение статуса для пользовпателя ${userId},схема:${friendshipId},тип:${type}`,
-        );
-        const findFriendshipSchema = await this.prisma.friendship.findFirst({
-            where: { id: friendshipId },
-        });
-        if (!findFriendshipSchema) throw new NotFoundException('запрос не найден');
-        if (findFriendshipSchema?.addresseeId !== userId)
-            throw new ForbiddenException('Нет прав для изменения запроса');
-        if (findFriendshipSchema.status === 'ACCEPTED')
-            throw new ConflictException('Запрос уже принят');
-        if (findFriendshipSchema.status === 'REJECTED') {
-            await this.prisma.friendship.delete({ where: { id: friendshipId } });
-            return { message: 'Запрос отклонен' };
-        }
-        const updateStatus = await this.prisma.friendship.update({
-            where: { id: friendshipId },
-            data: { status: type },
-        });
-        this.logger.log(`обновленный статус ${JSON.stringify(updateStatus.status)}`);
-        return { message: `Статус успешно обновлен ${updateStatus.status}` };
-    }
-    async deleteFriend(requesterId: string, addresseeId: string) {
-        this.logger.debug(
-            `Разрыв статуса дружбы между пользователями ${requesterId},${addresseeId}`,
-        );
-        const friendshipSchema = await this.prisma.friendship.findFirst({
-            where: {
-                OR: [
-                    { requesterId: requesterId, addresseeId: addresseeId },
-                    { requesterId: addresseeId, addresseeId: requesterId },
-                ],
-            },
-        });
-        this.logger.log(`${friendshipSchema?.id}`);
-        if (!friendshipSchema) throw new NotFoundException('дружба не обнаружена');
-        if (
-            friendshipSchema?.requesterId !== requesterId &&
-            friendshipSchema?.addresseeId !== requesterId
-        )
-            throw new ForbiddenException('Нет доступа для удаления');
+        this.logger.debug(`Updating friendship ${friendshipId} to ${type} by user ${userId}`);
 
-        this.logger.log(`найдена схема ${friendshipSchema?.id}`);
-        await this.prisma.friendship.delete({
-            where: { id: friendshipSchema?.id },
-        });
-        return { message: `Дружба между ${requesterId} и ${addresseeId} разорвана` };
+        try {
+            this.logger.verbose(`Fetching request ${friendshipId}`);
+            const request = await this.repository.findFriendshipById(friendshipId);
+
+            if (!request) {
+                this.logger.warn(`Request not found: ${friendshipId}`);
+                throw new NotFoundException('Request not found');
+            }
+
+            if (request.addresseeId !== userId) {
+                this.logger.warn(`Permission denied for user ${userId} on request ${friendshipId}`);
+                throw new ForbiddenException('No permission');
+            }
+
+            if (request.status === 'ACCEPTED') {
+                this.logger.warn(`Request already accepted: ${friendshipId}`);
+                throw new ConflictException('Request already accepted');
+            }
+
+            if (type === 'REJECTED') {
+                this.logger.verbose(`Rejecting request ${friendshipId}`);
+                await this.repository.delete(friendshipId);
+
+                this.logger.log(`Request rejected: ${friendshipId}`);
+                return { message: 'Request rejected' };
+            }
+
+            this.logger.verbose(`Accepting request ${friendshipId}`);
+            const result = await this.repository.updateStatus(friendshipId, type);
+
+            this.logger.log(
+                `Friendship accepted: ${friendshipId} between ${request.requesterId} and ${request.addresseeId}`,
+            );
+            return result;
+        } catch (error) {
+            this.logger.error(`Failed to update friendship status`, {
+                friendshipId,
+                userId,
+                type,
+                error: error.message,
+            });
+
+            if (
+                error instanceof NotFoundException ||
+                error instanceof ForbiddenException ||
+                error instanceof ConflictException
+            ) {
+                throw error;
+            }
+            throw new InternalServerErrorException('Friendship update failed');
+        }
+    }
+    async deleteFriendship(friendshipId: string, userId: string) {
+        this.logger.debug(`Deleting friendship ${friendshipId} by user ${userId}`);
+        try {
+            const friendship = await this.repository.findFriendshipById(friendshipId);
+            if (!friendship) {
+                this.logger.warn(`Friendship not found: ${friendshipId}`);
+                throw new NotFoundException('Friendship not found');
+            }
+            if (friendship.addresseeId !== userId && friendship.requesterId !== userId) {
+                this.logger.debug(
+                    `Адрессат ${friendship.addresseeId},Отправитель ${friendship.requesterId}`,
+                );
+                this.logger.warn(
+                    `User ${userId} has no permission to delete friendship ${friendshipId}`,
+                );
+                throw new ForbiddenException('You are not a participant of this friendship');
+            }
+            await this.repository.delete(friendshipId);
+            this.logger.log(`Friendship deleted: ${friendshipId}`);
+        } catch (error) {
+            this.logger.error(`Failed to delete friendship ${friendshipId}`, {
+                error: error.message,
+            });
+            if (error instanceof ForbiddenException || error instanceof NotFoundException)
+                throw error;
+            throw new InternalServerErrorException('Failed to delete friendship');
+        }
     }
 }

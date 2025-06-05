@@ -7,8 +7,6 @@ import { validate } from 'src/core/config/envConfig';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChatModule } from 'src/modules/chat/chat.module';
 import { FriendshipModule } from 'src/modules/friendship/friendship.module';
-import { BcryptModule } from 'src/modules/security/bcrypt/bcrypt.module';
-import { RefreshTokenModule } from 'src/modules/security/refresh-token/refresh-token.module';
 import { UsersModule } from 'src/modules/users/users.module';
 
 @Module({
@@ -23,10 +21,8 @@ import { UsersModule } from 'src/modules/users/users.module';
         }),
         ConfigModule.forRoot({ isGlobal: true, validate }),
         PrismaModule,
-        BcryptModule,
         UsersModule,
         AuthModule,
-        RefreshTokenModule,
         FriendshipModule,
         ChatModule,
     ],

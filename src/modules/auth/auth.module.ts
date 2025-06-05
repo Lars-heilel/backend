@@ -4,19 +4,21 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TokensModule } from './tokens/tokens.module';
+import { MailsModule } from '../mails/mails.module';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Env } from 'src/core/config/envConfig';
-import { RefreshTokenModule } from '../security/refresh-token/refresh-token.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { EmailModule } from '../security/email/email.module';
 
 @Module({
     controllers: [AuthController],
     providers: [AuthService, LocalStrategy, JwtStrategy],
     imports: [
-        EmailModule,
         UsersModule,
+        PassportModule,
+        TokensModule,
+        MailsModule,
         PassportModule,
         JwtModule.registerAsync({
             imports: [ConfigModule],
@@ -26,7 +28,6 @@ import { EmailModule } from '../security/email/email.module';
             }),
             inject: [ConfigService],
         }),
-        RefreshTokenModule,
     ],
 })
 export class AuthModule {}

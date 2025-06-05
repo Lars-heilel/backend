@@ -1,22 +1,14 @@
-import {
-    Injectable,
-    Logger,
-    OnModuleDestroy,
-    OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from './generated';
 
 @Injectable()
-export class PrismaService
-    extends PrismaClient
-    implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
     async onModuleInit() {
         try {
             await this.$connect();
-            Logger.log('База доступна');
+            Logger.log('DB ONLINE');
         } catch (error) {
-            Logger.log('База не доступна', error);
+            Logger.log('DB Offline', error);
             process.exit(1);
         }
     }

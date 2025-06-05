@@ -1,0 +1,455 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/users": {
+            "delete": {
+                "description": "Permanently deletes a user account using email address",
+                "operationId": "UsersController_deleteUser",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/DeleteUserDTO" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "User deleted successfully" },
+                    "400": { "description": "Invalid input data" },
+                    "404": { "description": "User not found" },
+                    "500": { "description": "Internal server error" }
+                },
+                "security": [{ "access-token": [] }],
+                "summary": "Delete user by email",
+                "tags": ["Users"]
+            },
+            "get": {
+                "description": "Search users by email, name or ID. At least one parameter must be provide",
+                "operationId": "UsersController_publicFindUsers",
+                "parameters": [
+                    {
+                        "name": "email",
+                        "required": false,
+                        "in": "query",
+                        "description": "User email for search",
+                        "schema": { "example": "user@example.com", "type": "string" }
+                    },
+                    {
+                        "name": "name",
+                        "required": false,
+                        "in": "query",
+                        "description": "User name for search",
+                        "schema": { "example": "John Doe", "type": "string" }
+                    },
+                    {
+                        "name": "id",
+                        "required": false,
+                        "in": "query",
+                        "description": "User ID for search",
+                        "schema": {
+                            "example": "550e8400-e29b-41d4-a716-446655440000",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/components/schemas/PublicUserDto" }
+                                }
+                            }
+                        },
+                        "description": "Array of matching users (may be empty)"
+                    },
+                    "400": { "description": "Invalid search parameters" },
+                    "500": { "description": "Internal server error" }
+                },
+                "security": [{ "access-token": [] }],
+                "summary": "Find users by criteria",
+                "tags": ["Users"]
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "operationId": "AuthController_register",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/CreateUserDto" }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "To complete registration, confirm your account via your email"
+                    },
+                    "400": { "description": "Validation errors" },
+                    "409": { "description": "User email or name already exists" }
+                },
+                "summary": "New user registration",
+                "tags": ["Auth"]
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "operationId": "AuthController_login",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/LoginDto" }
+                        }
+                    }
+                },
+                "responses": { "201": { "description": "" } },
+                "summary": "Authenticates user and returns access/refresh tokens",
+                "tags": ["Auth"]
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "operationId": "AuthController_logout",
+                "parameters": [],
+                "responses": { "201": { "description": "" } },
+                "summary": "logout",
+                "tags": ["Auth"]
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "operationId": "AuthController_refreshTokens",
+                "parameters": [],
+                "responses": { "201": { "description": "" } },
+                "summary": "getting a new pair of tokens based on refresh token",
+                "tags": ["Auth"]
+            }
+        },
+        "/mails/resend-confirmation": {
+            "post": {
+                "operationId": "MailsController_resendConfirmation",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/ResendConfirmationDto" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Confirmation email has been resent" },
+                    "401": { "description": "User not found" },
+                    "409": { "description": "Account already confirmed" }
+                },
+                "summary": "Resend confirmation email",
+                "tags": ["Mails"]
+            }
+        },
+        "/mails/verifyAccount": {
+            "get": {
+                "operationId": "MailsController_verifyAccount",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "required": true,
+                        "in": "query",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Account verified and tokens issued" },
+                    "401": { "description": "Invalid token" },
+                    "409": { "description": "Account already confirmed" }
+                },
+                "summary": "Verify user account",
+                "tags": ["Mails"]
+            }
+        },
+        "/mails/forgot-password": {
+            "post": {
+                "operationId": "MailsController_forgotPassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/ForgotPasswordDto" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Reset instructions sent if account exists" },
+                    "401": { "description": "User not found" }
+                },
+                "summary": "Request password reset",
+                "tags": ["Mails"]
+            }
+        },
+        "/mails/reset-password": {
+            "put": {
+                "operationId": "MailsController_resetPassword",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "required": true,
+                        "in": "query",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/ResetPasswordDto" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Password successfully changed" },
+                    "401": { "description": "Invalid token" }
+                },
+                "summary": "Reset user password",
+                "tags": ["Mails"]
+            }
+        },
+        "/friendship": {
+            "post": {
+                "operationId": "FriendshipController_sendRequest",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/SendFriendRequestDto" }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": { "description": "Request sent" },
+                    "409": { "description": "Conflict" }
+                },
+                "security": [{ "access-token": [] }],
+                "summary": "send friendship request",
+                "tags": ["Friendship"]
+            },
+            "get": {
+                "operationId": "FriendshipController_getIncomingRequests",
+                "parameters": [],
+                "responses": { "200": { "description": "List of requests" } },
+                "security": [{ "access-token": [] }],
+                "summary": "Get incoming requests",
+                "tags": ["Friendship"]
+            }
+        },
+        "/friendship/{friendshipId}": {
+            "patch": {
+                "operationId": "FriendshipController_updateStatus",
+                "parameters": [
+                    {
+                        "name": "friendshipId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Request ID",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": { "$ref": "#/components/schemas/UpdateFriendshipStatusDto" }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "Status updated" },
+                    "403": { "description": "Forbidden" }
+                },
+                "security": [{ "access-token": [] }],
+                "summary": "Update request status",
+                "tags": ["Friendship"]
+            },
+            "delete": {
+                "operationId": "FriendshipController_deleteFriend",
+                "parameters": [
+                    {
+                        "name": "friendshipId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Friendship ID",
+                        "schema": { "type": "string" }
+                    }
+                ],
+                "responses": {
+                    "200": { "description": "Friendship deleted" },
+                    "404": { "description": "Not found" }
+                },
+                "security": [{ "access-token": [] }],
+                "summary": "Delete friendship",
+                "tags": ["Friendship"]
+            }
+        }
+    },
+    "info": { "title": "Realtime chat app", "description": "", "version": "1.0.0", "contact": {} },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "securitySchemes": {
+            "access-token": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http",
+                "description": "Enter a JWT token in the format: **Bearer <token>**"
+            },
+            "cookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "refresh-token",
+                "description": "Refresh token to get a new access token"
+            }
+        },
+        "schemas": {
+            "DeleteUserDTO": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User email for deletion",
+                        "example": "user@example.com"
+                    }
+                },
+                "required": ["email"]
+            },
+            "PublicUserDto": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "550e8400-e29b-41d4-a716-446655440000",
+                        "description": "Unique user identifier"
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "user@example.com",
+                        "description": "User email address"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe",
+                        "description": "User display name"
+                    }
+                },
+                "required": ["id", "email", "name"]
+            },
+            "CreateUserDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User email address",
+                        "example": "user@example.com",
+                        "format": "email"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Full name of the user",
+                        "example": "John Doe",
+                        "minLength": 2
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "User password",
+                        "example": "P@ssw0rd123",
+                        "minLength": 8,
+                        "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$"
+                    }
+                },
+                "required": ["email", "name", "password"]
+            },
+            "LoginDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User email address",
+                        "example": "user@example.com",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "User password",
+                        "example": "P@ssw0rd123",
+                        "minLength": 8,
+                        "pattern": "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$"
+                    }
+                },
+                "required": ["email", "password"]
+            },
+            "ResendConfirmationDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User email address",
+                        "example": "user@example.com",
+                        "format": "email"
+                    }
+                },
+                "required": ["email"]
+            },
+            "ForgotPasswordDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User email address",
+                        "example": "user@example.com"
+                    }
+                },
+                "required": ["email"]
+            },
+            "ResetPasswordDto": {
+                "type": "object",
+                "properties": {
+                    "password": {
+                        "type": "string",
+                        "description": "New password",
+                        "example": "NewSecurePassword123!",
+                        "pattern": "/^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$/",
+                        "minLength": 8
+                    }
+                },
+                "required": ["password"]
+            },
+            "SendFriendRequestDto": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User Id",
+                        "example": "550e8400-e29b-41d4-a716-446655440000"
+                    }
+                },
+                "required": ["userId"]
+            },
+            "UpdateFriendshipStatusDto": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": ["ACCEPTED", "REJECTED"],
+                        "description": "action type"
+                    }
+                },
+                "required": ["type"]
+            }
+        }
+    }
+}
