@@ -12,7 +12,6 @@ import { FindUserDTO } from './DTO/findUsers.dto';
 import { UserRepositoryAbstract } from './repositories/user.repository.abstract';
 import { EncryptionAbstract } from 'src/core/security/encryption/encryption.abstract';
 import { CreateUserDto } from './DTO/createUser.dto';
-import { SafeUser } from './Types/user.types';
 import { PublicUserDto } from './DTO/publicProfile.dto';
 
 @Injectable()
@@ -234,11 +233,6 @@ export class UsersService {
         this.logger.debug(`Validating user: ${email}`);
         try {
             const user = await this.findUserByEmail(email);
-            if (!user) {
-                this.logger.warn(`Validation failed - user not found: ${email}`);
-                throw new UnauthorizedException('User not registered');
-            }
-
             if (!user.isConfirmed) {
                 this.logger.warn(`Validation failed - account not confirmed: ${email}`);
                 throw new UnauthorizedException('Account not confirmed');
@@ -256,8 +250,8 @@ export class UsersService {
         } catch (error) {
             this.logger.error(`User validation failed for ${email}`, {
                 error: error.message,
-                stack: error.stack,
             });
+            if (error instanceof NotFoundException) throw new UnauthorizedException('User not registered');
             if (error instanceof UnauthorizedException) throw error;
             throw new InternalServerErrorException('User validation failed');
         }

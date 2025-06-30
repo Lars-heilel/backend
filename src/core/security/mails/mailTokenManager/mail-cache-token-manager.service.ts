@@ -32,9 +32,6 @@ export class CacheTokenManager extends MailTokenManagerAbstract {
             const token = randomBytes(32).toString('hex');
             const ttl = type === 'confirm' ? 3600 * 1000 : 900 * 1000;
 
-            // ВНИМАНИЕ: удалить после тестирования
-            this.logger.warn(`[DEBUG] Generated ${type} token: ${token} - REMOVE AFTER TESTS`);
-
             this.logger.verbose(`Caching token ${token.substring(0, 8)}... for ${ttl / 1000} sec`);
             await this.cacheManager.set(`${type}:${token}`, user, ttl);
             await this.cacheManager.set(oldTokenKey, token, ttl);
@@ -56,9 +53,6 @@ export class CacheTokenManager extends MailTokenManagerAbstract {
         this.logger.debug(`Validating ${type} token: ${cacheKey}`);
 
         try {
-            // ВНИМАНИЕ: удалить после тестирования
-            this.logger.verbose(`[DEBUG] Validating token: ${token} - REMOVE AFTER TESTS`);
-
             const user = await this.cacheManager.get<UserFromCache>(cacheKey);
             if (!user) {
                 this.logger.warn(`Token validation failed: invalid or expired`, {
@@ -85,9 +79,6 @@ export class CacheTokenManager extends MailTokenManagerAbstract {
         this.logger.debug(`Revoking token: ${cacheKey}`);
 
         try {
-            // ВНИМАНИЕ: удалить после тестирования
-            this.logger.verbose(`[DEBUG] Revoking token: ${token} - REMOVE AFTER TESTS`);
-
             await this.cacheManager.del(cacheKey);
             this.logger.verbose(`Token revoked: ${token.substring(0, 8)}...`);
         } catch (error) {

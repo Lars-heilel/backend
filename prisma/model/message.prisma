@@ -1,4 +1,4 @@
-model ChatRoom {
+model Message {
     id         String   @id @default(uuid())
     senderId   String
     receiverId String

@@ -28,7 +28,7 @@ export class MailsController {
         await this.mailsService.resendConfirmationEmail(DTO.email);
         return { message: 'Confirmation email has been resent' };
     }
-    @Get('verifyAccount')
+    @Get('verify-account')
     @SwaggerDocumentation({
         operations: { summary: 'Verify user account' },
         responses: [

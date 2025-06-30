@@ -7,6 +7,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { FriendshipRepositoryAbstract } from './repo/friendship.repository.abstract';
+import { Friendship } from 'prisma/generated';
 
 @Injectable()
 export class FriendshipService {
@@ -164,5 +165,15 @@ export class FriendshipService {
                 throw error;
             throw new InternalServerErrorException('Failed to delete friendship');
         }
+    }
+    async validateByAcceptedStatus(
+        firstUserId: string,
+        secondUserId: string,
+    ): Promise<Pick<Friendship, 'status'>> {
+        const friendship = await this.repository.findActiveFriendship(firstUserId, secondUserId);
+        if (!friendship) {
+            throw new ConflictException(`Friendship does not exist`);
+        }
+        return friendship;
     }
 }

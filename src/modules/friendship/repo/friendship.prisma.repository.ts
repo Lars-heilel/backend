@@ -25,6 +25,29 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
             },
         });
     }
+    async getFriendList(userId: string): Promise<Friendship[]> {
+        return this.prisma.friendship.findMany({
+            where: { status: 'ACCEPTED', OR: [{ requesterId: userId }, { addresseeId: userId }] },
+            skip: 0,
+            take: 20,
+            include: { requester: { select: { name: true, id: true } } },
+        });
+    }
+    async findActiveFriendship(
+        firstUserId: string,
+        secondUserId: string,
+    ): Promise<Pick<Friendship, 'status'> | null> {
+        return this.prisma.friendship.findFirst({
+            where: {
+                status: 'ACCEPTED',
+                OR: [
+                    { requesterId: firstUserId, addresseeId: secondUserId },
+                    { requesterId: secondUserId, addresseeId: firstUserId },
+                ],
+            },
+            select: { status: true },
+        });
+    }
 
     async findFriendshipById(friendshipId: string): Promise<Friendship | null> {
         return this.prisma.friendship.findUnique({ where: { id: friendshipId } });

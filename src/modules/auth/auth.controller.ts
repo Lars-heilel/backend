@@ -3,7 +3,7 @@ import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
 import { LoginDto, LoginSchema } from './DTO/LoginUserDto';
 import { CreateUserDto, CreateUserSchema } from '../users/DTO/createUser.dto';
 import { SwaggerDocumentation } from 'src/common/decorators/swagger/swagger.decorator';
-import { Body, Controller, Logger, Post, Req, Res, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Req, Res, UseGuards, UsePipes, Get } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtUser } from './tokens/types/jwt-req';
@@ -61,5 +61,10 @@ export class AuthController {
     async refreshTokens(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
         const token = req.cookies['refreshToken'];
         return await this.authService.refresh(token, res);
+    }
+    @Get('test')
+    @UseGuards(AuthGuard('jwt'))
+    async test() {
+        return 'Тестовый роут авторизации абоба';
     }
 }
