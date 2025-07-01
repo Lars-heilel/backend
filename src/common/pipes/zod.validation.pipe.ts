@@ -4,7 +4,7 @@ export class ZodValidationPipe<T> implements PipeTransform {
     private readonly logger = new Logger(ZodValidationPipe.name);
     constructor(private schema: ZodSchema<T>) {}
     transform(value: unknown): T {
-        //    this.logger.debug(`input value:${JSON.stringify(value)}`);
+        this.logger.debug(`input value:${JSON.stringify(value)}`);
         const result = this.schema.safeParse(value);
 
         if (!result.success) {

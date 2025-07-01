@@ -3,6 +3,7 @@ import {
     Injectable,
     InternalServerErrorException,
     Logger,
+    NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import { MailsAbstract } from 'src/core/security/mails/mails.abstract';
@@ -60,6 +61,8 @@ export class MailsService {
             this.logger.log(`Reset password email sent successfully to ${email}`);
         } catch (error) {
             this.logger.error(`Password reset process failed for ${email}`, error.stack);
+            if (error instanceof NotFoundException)
+                throw new UnauthorizedException('User not registered');
             if (error instanceof UnauthorizedException) throw error;
             throw new InternalServerErrorException('Password reset email sending failed');
         }

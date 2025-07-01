@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Put, Query, Res, UsePipes } from '@nestjs/
 import { MailsService } from './mails.service';
 import { Response } from 'express';
 import { ResetPasswordDto, ResetPasswordSchema } from './DTO/ResetPassword.dto';
-import { ZodValidationPipe } from 'nestjs-zod';
+import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
 import { ResendConfirmationDto, ResendConfirmationDtoSchema } from './DTO/resend-confirmation.dto';
 import { ForgotPasswordDto, ForgotPasswordDtoSchema } from './DTO/forgot-password.dto';
 import { SwaggerDocumentation } from 'src/common/decorators/swagger/swagger.decorator';
@@ -68,8 +68,10 @@ export class MailsController {
             { status: 401, description: 'Invalid token' },
         ],
     })
-    @UsePipes(new ZodValidationPipe(ResetPasswordSchema))
-    async resetPassword(@Query('token') token: string, @Body() DTO: ResetPasswordDto) {
+    async resetPassword(
+        @Query('token') token: string,
+        @Body(new ZodValidationPipe(ResetPasswordSchema)) DTO: ResetPasswordDto,
+    ) {
         await this.mailsService.resetPassword(token, DTO.password);
         return { message: 'Password successfully changed' };
     }

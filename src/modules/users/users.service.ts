@@ -220,7 +220,6 @@ export class UsersService {
         } catch (error) {
             this.logger.error(`Password update failed for ${email}`, {
                 error: error.message,
-                stack: error.stack,
             });
             if (error instanceof NotFoundException || error instanceof ConflictException) {
                 throw error;
@@ -251,7 +250,8 @@ export class UsersService {
             this.logger.error(`User validation failed for ${email}`, {
                 error: error.message,
             });
-            if (error instanceof NotFoundException) throw new UnauthorizedException('User not registered');
+            if (error instanceof NotFoundException)
+                throw new UnauthorizedException('User not registered');
             if (error instanceof UnauthorizedException) throw error;
             throw new InternalServerErrorException('User validation failed');
         }
