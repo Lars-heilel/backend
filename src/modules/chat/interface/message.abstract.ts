@@ -1,4 +1,4 @@
-import { Message } from 'prisma/generated';
+import { Message } from '@prisma/generated/client';
 
 export abstract class MessageAbstract {
     abstract saveMessage(senderId: string, receiverId: string, content: string): Promise<Message>;

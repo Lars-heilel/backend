@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '@prisma/prisma.service';
 import { CreateUserDto } from '../DTO/createUser.dto';
 import { USER_SELECT_FIELDS } from '../const/user.prisma.constants';
 import { confirmationDetails, SafeUser } from '../Types/user.types';
 import { FindUserDTO } from '../DTO/findUsers.dto';
-import { User } from 'prisma/generated';
+import { User } from '@prisma/generated/client';
 import { UserRepositoryAbstract } from './user.repository.abstract';
 import { PublicUserDto } from '../DTO/publicProfile.dto';
 

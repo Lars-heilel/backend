@@ -3,7 +3,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PrismaModule } from 'prisma/prisma.module';
+import { PrismaModule } from '@prisma/prisma.module';
 import { validate } from 'src/core/config/envConfig';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChatModule } from 'src/modules/chat/chat.module';

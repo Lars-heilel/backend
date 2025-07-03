@@ -8,7 +8,7 @@ import { WsSessionAbstract } from './interface/ws-sessoin.abstract';
 import { WsAuthStrategy } from './stratrgy/ws-auth.stategy';
 import { MessageAbstract } from './interface/message.abstract';
 import { MessagePrismaRepository } from './repository/message.prisma.repository';
-import { PrismaModule } from 'prisma/prisma.module';
+import { PrismaModule } from '@prisma/prisma.module';
 import { FriendshipModule } from '../friendship/friendship.module';
 
 @Module({

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FriendshipService } from './friendship.service';
 import { FriendshipController } from './friendship.controller';
-import { PrismaModule } from 'prisma/prisma.module';
+import { PrismaModule } from '@prisma/prisma.module';
 import { FriendshipRepositoryAbstract } from './repo/friendship.repository.abstract';
 import { FriendshipPrismaRepository } from './repo/friendship.prisma.repository';
 

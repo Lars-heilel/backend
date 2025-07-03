@@ -1,7 +1,7 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { RefreshTokensRepositoryAbsctract } from './refreshTokens.repository.abstract';
-import { PrismaService } from 'prisma/prisma.service';
-import { Token } from 'prisma/generated';
+import { PrismaService } from '@prisma/prisma.service';
+import { Token } from '@prisma/generated/client';
 
 @Injectable()
 export class RefresTokenPrismaRepository extends RefreshTokensRepositoryAbsctract {

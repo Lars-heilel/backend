@@ -7,7 +7,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 
-import { User } from 'prisma/generated';
+import { User } from '@prisma/generated/client';
 import { FindUserDTO } from './DTO/findUsers.dto';
 import { UserRepositoryAbstract } from './repositories/user.repository.abstract';
 import { EncryptionAbstract } from 'src/core/security/encryption/encryption.abstract';

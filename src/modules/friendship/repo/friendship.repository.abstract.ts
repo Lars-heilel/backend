@@ -1,4 +1,4 @@
-import { Friendship, FriendshipStatus } from 'prisma/generated';
+import { Friendship, FriendshipStatus } from '@prisma/generated/client';
 
 export abstract class FriendshipRepositoryAbstract {
     abstract createRequest(requesterId: string, addresseeId: string): Promise<Friendship>;

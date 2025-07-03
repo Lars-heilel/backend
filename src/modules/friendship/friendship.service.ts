@@ -7,7 +7,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { FriendshipRepositoryAbstract } from './repo/friendship.repository.abstract';
-import { Friendship } from 'prisma/generated';
+import { Friendship } from '@prisma/generated/client';
 
 @Injectable()
 export class FriendshipService {

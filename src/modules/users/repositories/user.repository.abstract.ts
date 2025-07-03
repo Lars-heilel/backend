@@ -1,4 +1,4 @@
-import { User } from 'prisma/generated';
+import { User } from '@prisma/generated/client';
 import { CreateUserDto } from '../DTO/createUser.dto';
 import { confirmationDetails, SafeUser } from '../Types/user.types';
 import { FindUserDTO } from '../DTO/findUsers.dto';
