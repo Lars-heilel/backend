@@ -24,7 +24,7 @@ export class AuthService {
         const payload: JwtPayload = { sub: user.id, email: user.email };
         const { access_token, refresh_token } = await this.tokenService.createTokens(payload);
         await this.tokenService.setRefreshTokenCookie(res, refresh_token);
-        return access_token;
+        return { token: access_token, user: user };
     }
     async logout(userId: string) {
         await this.tokenService.revokeRefreshToken(userId);

@@ -20,7 +20,7 @@ import { UsersModule } from 'src/modules/users/users.module';
         }),
         CacheModule.registerAsync({
             imports: [ConfigModule],
-            useFactory: async () => ({
+            useFactory: () => ({
                 stores: [createKeyv('redis://localhost:6379')],
                 ttl: 24 * 60 * 60 * 1000,
             }),

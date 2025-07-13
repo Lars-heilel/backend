@@ -112,10 +112,7 @@ export class MailsService {
             await this.tokensService.setRefreshTokenCookie(res, refresh_token);
 
             this.logger.log(`Account successfully verified: ${user.email}`);
-            return {
-                message: `User account ${user.email} verified`,
-                access_token,
-            };
+            return { token: access_token, user: user };
         } catch (error) {
             this.logger.error(`Account verification failed`, error.stack);
             if (error instanceof UnauthorizedException || error instanceof ConflictException) {

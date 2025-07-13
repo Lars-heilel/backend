@@ -3,6 +3,7 @@ import {
     UnauthorizedException,
     Logger,
     InternalServerErrorException,
+    ForbiddenException,
 } from '@nestjs/common';
 import { RefreshTokensRepositoryAbsctract } from './repositories/refreshToken/refreshTokens.repository.abstract';
 
@@ -122,7 +123,7 @@ export class TokensService {
             return { sub: user.id, email: user.email };
         } catch (error) {
             this.logger.error(`Refresh token validation failed `, error.message);
-            throw new UnauthorizedException('Invalid refresh token');
+            throw new ForbiddenException(`Refresh token validation failed`);
         }
     }
 }

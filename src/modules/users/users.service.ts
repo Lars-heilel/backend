@@ -27,8 +27,8 @@ export class UsersService {
         this.logger.debug(`Starting registration for email: ${DTO.email}`);
         try {
             const [existingUser, existingNameUser] = await Promise.all([
-                await this.userRepo.findUserByEmail(DTO.email),
-                await this.userRepo.findUserByName(DTO.name),
+                this.userRepo.findUserByEmail(DTO.email),
+                this.userRepo.findUserByName(DTO.name),
             ]);
 
             if (existingUser) {
@@ -53,16 +53,27 @@ export class UsersService {
 
             this.logger.log(`User registered successfully - ID: ${user.id} Email: ${user.email}`);
             return user;
-        } catch (error) {
-            this.logger.error(`Registration failed for ${DTO.email}`, {
-                error: error.message,
-                stack: error.stack,
-            });
-            if (error instanceof ConflictException) throw error;
+        } catch (error: unknown) {
+            if (error instanceof ConflictException) {
+                this.logger.error(`Registration failed for ${DTO.email}`, {
+                    error: error.message,
+                    stack: error.stack,
+                });
+                throw error;
+            } else if (error instanceof Error) {
+                this.logger.error(`Registration failed for ${DTO.email}`, {
+                    error: error.message,
+                    stack: error.stack,
+                });
+            } else {
+                this.logger.error(`Registration failed for ${DTO.email}`, {
+                    error: String(error),
+                    stack: 'No stack available',
+                });
+            }
             throw new InternalServerErrorException('Registration process failed');
         }
     }
-
     async deleteUser(email: string) {
         this.logger.debug(`Starting user deletion process for: ${email}`);
         try {
