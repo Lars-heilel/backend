@@ -11,19 +11,12 @@ export class BcryptService extends EncryptionAbstract {
     }
 
     async hash(data: string): Promise<string> {
-        const saltRounds = this.env.get('SALT_ROUNDS');
-        try {
-            return await bcrypt.hash(data, saltRounds);
-        } catch (error) {
-            throw new Error('Password hashing failed');
-        }
+        const saltRounds = this.env.getOrThrow('SALT_ROUNDS', { infer: true });
+
+        return await bcrypt.hash(data, saltRounds);
     }
 
     async compare(data: string, hashedData: string): Promise<boolean> {
-        try {
-            return await bcrypt.compare(data, hashedData);
-        } catch (error) {
-            throw new Error('Password comparison failed');
-        }
+        return await bcrypt.compare(data, hashedData);
     }
 }

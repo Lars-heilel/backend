@@ -2,12 +2,11 @@ import { User } from '@prisma/generated/client';
 import { CreateUserDto } from '../DTO/createUser.dto';
 import { confirmationDetails, SafeUser } from '../Types/user.types';
 import { FindUserDTO } from '../DTO/findUsers.dto';
-import { PublicUserDto } from '../DTO/publicProfile.dto';
 
 export abstract class UserRepositoryAbstract {
     abstract create(data: CreateUserDto): Promise<SafeUser>;
-    abstract delete(email: string): Promise<{ success: `User deleted` }>;
-    abstract publicFindUsers(data: FindUserDTO): Promise<PublicUserDto[]>;
+    abstract delete(email: string): Promise<{ success: 'User deleted' }>;
+    abstract publicFindUsers(data: FindUserDTO): Promise<SafeUser[]>;
     abstract findUserByEmail(email: string): Promise<User | null>;
     abstract findUserById(userId: string): Promise<User | null>;
     abstract findUserByName(name: string): Promise<User | null>;

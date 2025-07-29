@@ -6,7 +6,6 @@ import { confirmationDetails, SafeUser } from '../Types/user.types';
 import { FindUserDTO } from '../DTO/findUsers.dto';
 import { User } from '@prisma/generated/client';
 import { UserRepositoryAbstract } from './user.repository.abstract';
-import { PublicUserDto } from '../DTO/publicProfile.dto';
 
 @Injectable()
 export class UserPrismaRepository extends UserRepositoryAbstract {
@@ -24,7 +23,7 @@ export class UserPrismaRepository extends UserRepositoryAbstract {
         await this.prisma.user.delete({ where: { email } });
         return { success: 'User deleted' };
     }
-    async publicFindUsers(data: FindUserDTO): Promise<PublicUserDto[]> {
+    async publicFindUsers(data: FindUserDTO): Promise<SafeUser[]> {
         const user = await this.prisma.user.findFirst({
             where: {
                 isConfirmed: true,

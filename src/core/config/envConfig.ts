@@ -35,12 +35,6 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
-declare global {
-    namespace NodeJS {
-        interface ProcessEnv extends z.infer<typeof envSchema> {}
-    }
-}
-
 export function validate(config: Record<string, unknown>): Env {
     try {
         return envSchema.parse(config);

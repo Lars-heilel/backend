@@ -13,17 +13,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
     async validate(email: string, password: string) {
         this.logger.debug(`Authentication attempt: ${email}`);
-        try {
-            const user = await this.usersService.validateUser(email, password);
-            if (!user) {
-                this.logger.warn(`Authentication failed: ${email}`);
-                throw new UnauthorizedException();
-            }
-            this.logger.log(`User authenticated: ${email}`);
-            return user;
-        } catch (error) {
-            this.logger.error(`Authentication error: ${email}`, error.message);
-            throw error;
+
+        const user = await this.usersService.validateUser(email, password);
+        if (!user) {
+            this.logger.warn(`Authentication failed: ${email}`);
+            throw new UnauthorizedException();
         }
+        this.logger.log(`User authenticated: ${email}`);
+        return user;
     }
 }

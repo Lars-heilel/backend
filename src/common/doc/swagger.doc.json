@@ -3,7 +3,6 @@
     "paths": {
         "/users": {
             "delete": {
-                "description": "Permanently deletes a user account using email address",
                 "operationId": "UsersController_deleteUser",
                 "parameters": [],
                 "requestBody": {
@@ -16,16 +15,14 @@
                 },
                 "responses": {
                     "200": { "description": "User deleted successfully" },
-                    "400": { "description": "Invalid input data" },
-                    "404": { "description": "User not found" },
-                    "500": { "description": "Internal server error" }
+                    "400": { "description": "Bad Request" },
+                    "401": { "description": "Unauthorized" }
                 },
-                "security": [{ "access-token": [] }],
+                "security": [{ "refresh-token": [] }, { "access-token": [] }],
                 "summary": "Delete user by email",
                 "tags": ["Users"]
             },
             "get": {
-                "description": "Search users by email, name or ID. At least one parameter must be provide",
                 "operationId": "UsersController_publicFindUsers",
                 "parameters": [
                     {
@@ -54,22 +51,12 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": { "$ref": "#/components/schemas/PublicUserDto" }
-                                }
-                            }
-                        },
-                        "description": "Array of matching users (may be empty)"
-                    },
-                    "400": { "description": "Invalid search parameters" },
-                    "500": { "description": "Internal server error" }
+                    "200": { "description": "Users found successfully" },
+                    "400": { "description": "Bad Request" },
+                    "401": { "description": "Unauthorized" }
                 },
-                "security": [{ "access-token": [] }],
-                "summary": "Find users by criteria",
+                "security": [{ "refresh-token": [] }, { "access-token": [] }],
+                "summary": "Find users by query",
                 "tags": ["Users"]
             }
         },
@@ -79,6 +66,7 @@
                 "parameters": [],
                 "requestBody": {
                     "required": true,
+                    "description": "User registration data",
                     "content": {
                         "application/json": {
                             "schema": { "$ref": "#/components/schemas/CreateUserDto" }
@@ -86,13 +74,10 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "To complete registration, confirm your account via your email"
-                    },
-                    "400": { "description": "Validation errors" },
-                    "409": { "description": "User email or name already exists" }
+                    "201": { "description": "User successfully registered." },
+                    "400": { "description": "Invalid input data." }
                 },
-                "summary": "New user registration",
+                "summary": "Register a new user",
                 "tags": ["Auth"]
             }
         },
@@ -102,14 +87,32 @@
                 "parameters": [],
                 "requestBody": {
                     "required": true,
+                    "description": "User login credentials",
                     "content": {
                         "application/json": {
                             "schema": { "$ref": "#/components/schemas/LoginDto" }
                         }
                     }
                 },
-                "responses": { "201": { "description": "" } },
-                "summary": "Authenticates user and returns access/refresh tokens",
+                "responses": {
+                    "200": {
+                        "description": "User successfully logged in, tokens in response/cookies.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "accessToken": {
+                                            "type": "string",
+                                            "description": "JWT Access Token"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { "description": "Invalid credentials." }
+                },
+                "summary": "Log in a user and get tokens",
                 "tags": ["Auth"]
             }
         },
@@ -117,8 +120,12 @@
             "post": {
                 "operationId": "AuthController_logout",
                 "parameters": [],
-                "responses": { "201": { "description": "" } },
-                "summary": "logout",
+                "responses": {
+                    "200": { "description": "User successfully logged out." },
+                    "401": { "description": "Unauthorized access." }
+                },
+                "security": [{ "access-token": [] }],
+                "summary": "Log out a user",
                 "tags": ["Auth"]
             }
         },
@@ -126,8 +133,26 @@
             "post": {
                 "operationId": "AuthController_refreshTokens",
                 "parameters": [],
-                "responses": { "201": { "description": "" } },
-                "summary": "getting a new pair of tokens based on refresh token",
+                "responses": {
+                    "200": {
+                        "description": "Access token successfully refreshed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "accessToken": {
+                                            "type": "string",
+                                            "description": "New JWT Access Token"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": { "description": "Invalid or expired refresh token." }
+                },
+                "security": [{ "refreshToken": [] }],
+                "summary": "Refresh access token using refresh token",
                 "tags": ["Auth"]
             }
         },
@@ -143,16 +168,12 @@
                         }
                     }
                 },
-                "responses": {
-                    "200": { "description": "Confirmation email has been resent" },
-                    "401": { "description": "User not found" },
-                    "409": { "description": "Account already confirmed" }
-                },
+                "responses": { "200": { "description": "Confirmation email has been resent" } },
                 "summary": "Resend confirmation email",
                 "tags": ["Mails"]
             }
         },
-        "/mails/verifyAccount": {
+        "/mails/verify-account": {
             "get": {
                 "operationId": "MailsController_verifyAccount",
                 "parameters": [
@@ -163,12 +184,8 @@
                         "schema": { "type": "string" }
                     }
                 ],
-                "responses": {
-                    "200": { "description": "Account verified and tokens issued" },
-                    "401": { "description": "Invalid token" },
-                    "409": { "description": "Account already confirmed" }
-                },
-                "summary": "Verify user account",
+                "responses": { "200": { "description": "Account successfully verified" } },
+                "summary": "Verify account by token",
                 "tags": ["Mails"]
             }
         },
@@ -185,10 +202,9 @@
                     }
                 },
                 "responses": {
-                    "200": { "description": "Reset instructions sent if account exists" },
-                    "401": { "description": "User not found" }
+                    "200": { "description": "If account exists, reset instructions were sent" }
                 },
-                "summary": "Request password reset",
+                "summary": "Send password reset email",
                 "tags": ["Mails"]
             }
         },
@@ -211,11 +227,8 @@
                         }
                     }
                 },
-                "responses": {
-                    "200": { "description": "Password successfully changed" },
-                    "401": { "description": "Invalid token" }
-                },
-                "summary": "Reset user password",
+                "responses": { "200": { "description": "Password successfully changed" } },
+                "summary": "Reset password by token",
                 "tags": ["Mails"]
             }
         },
@@ -231,20 +244,17 @@
                         }
                     }
                 },
-                "responses": {
-                    "201": { "description": "Request sent" },
-                    "409": { "description": "Conflict" }
-                },
+                "responses": { "201": { "description": "Friend request created" } },
                 "security": [{ "access-token": [] }],
-                "summary": "send friendship request",
+                "summary": "Send a friend request",
                 "tags": ["Friendship"]
             },
             "get": {
                 "operationId": "FriendshipController_getIncomingRequests",
                 "parameters": [],
-                "responses": { "200": { "description": "List of requests" } },
+                "responses": { "200": { "description": "List of incoming friend requests" } },
                 "security": [{ "access-token": [] }],
-                "summary": "Get incoming requests",
+                "summary": "Get incoming friend requests",
                 "tags": ["Friendship"]
             }
         },
@@ -256,7 +266,6 @@
                         "name": "friendshipId",
                         "required": true,
                         "in": "path",
-                        "description": "Request ID",
                         "schema": { "type": "string" }
                     }
                 ],
@@ -268,12 +277,9 @@
                         }
                     }
                 },
-                "responses": {
-                    "200": { "description": "Status updated" },
-                    "403": { "description": "Forbidden" }
-                },
+                "responses": { "200": { "description": "Friendship status updated" } },
                 "security": [{ "access-token": [] }],
-                "summary": "Update request status",
+                "summary": "Update friendship status (accept/reject)",
                 "tags": ["Friendship"]
             },
             "delete": {
@@ -283,17 +289,84 @@
                         "name": "friendshipId",
                         "required": true,
                         "in": "path",
-                        "description": "Friendship ID",
                         "schema": { "type": "string" }
                     }
                 ],
+                "responses": { "200": { "description": "Friendship deleted" } },
+                "security": [{ "access-token": [] }],
+                "summary": "Delete a friendship",
+                "tags": ["Friendship"]
+            }
+        },
+        "/chat/history": {
+            "get": {
+                "operationId": "ChatController_getChatHistory",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "required": true,
+                        "in": "query",
+                        "description": "ID of the user requesting the chat history",
+                        "schema": { "example": "user123", "type": "string" }
+                    },
+                    {
+                        "name": "secondUserId",
+                        "required": true,
+                        "in": "query",
+                        "description": "ID of the second user in the chat",
+                        "schema": { "example": "user456", "type": "string" }
+                    },
+                    {
+                        "name": "limit",
+                        "required": true,
+                        "in": "query",
+                        "description": "Number of messages to retrieve (1-100)",
+                        "schema": { "minimum": 1, "maximum": 100, "example": 20, "type": "number" }
+                    },
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "Cursor for pagination, used to fetch messages after a specific point",
+                        "schema": { "$ref": "#/components/schemas/Object" }
+                    },
+                    {
+                        "name": "cursor[createAt]",
+                        "required": false,
+                        "in": "query",
+                        "description": "Optional: Creation date of the message to start fetching from (for pagination)",
+                        "schema": {
+                            "format": "date-time",
+                            "example": "2023-10-27T10:00:00Z",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "cursor[id]",
+                        "required": false,
+                        "in": "query",
+                        "description": "Optional: ID of the message to start fetching from (for pagination)",
+                        "schema": { "example": "message789", "type": "string" }
+                    }
+                ],
                 "responses": {
-                    "200": { "description": "Friendship deleted" },
-                    "404": { "description": "Not found" }
+                    "200": {
+                        "description": "Successfully retrieved chat history.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/components/schemas/HistoryDto" }
+                                }
+                            }
+                        }
+                    },
+                    "400": { "description": "Invalid input parameters." },
+                    "401": { "description": "Unauthorized access." }
                 },
                 "security": [{ "access-token": [] }],
-                "summary": "Delete friendship",
-                "tags": ["Friendship"]
+                "summary": "Get chat history between two users",
+                "tags": ["Chat"]
             }
         }
     },
@@ -326,27 +399,6 @@
                     }
                 },
                 "required": ["email"]
-            },
-            "PublicUserDto": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "example": "550e8400-e29b-41d4-a716-446655440000",
-                        "description": "Unique user identifier"
-                    },
-                    "email": {
-                        "type": "string",
-                        "example": "user@example.com",
-                        "description": "User email address"
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "John Doe",
-                        "description": "User display name"
-                    }
-                },
-                "required": ["id", "email", "name"]
             },
             "CreateUserDto": {
                 "type": "object",
@@ -449,6 +501,34 @@
                     }
                 },
                 "required": ["type"]
+            },
+            "Object": { "type": "object", "properties": {} },
+            "HistoryDto": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "ID of the user requesting the chat history",
+                        "example": "user123"
+                    },
+                    "secondUserId": {
+                        "type": "string",
+                        "description": "ID of the second user in the chat",
+                        "example": "user456"
+                    },
+                    "limit": {
+                        "type": "number",
+                        "description": "Number of messages to retrieve",
+                        "example": 20,
+                        "minimum": 1,
+                        "maximum": 100
+                    },
+                    "cursor": {
+                        "type": "object",
+                        "description": "Cursor for pagination, used to fetch messages after a specific point"
+                    }
+                },
+                "required": ["userId", "secondUserId", "limit"]
             }
         }
     }

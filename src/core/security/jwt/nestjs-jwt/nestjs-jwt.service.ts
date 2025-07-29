@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtAbstract } from '../jwt.abstract';
 import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from '@src/modules/auth/tokens/types/jwt-payload';
 
 @Injectable()
 export class NestjsJwtService extends JwtAbstract {
@@ -14,6 +15,6 @@ export class NestjsJwtService extends JwtAbstract {
         return await this.jwt.signAsync(payload, signOptions);
     }
     async verifyToken(token: string, signOptions: { secret: string }) {
-        return await this.jwt.verifyAsync(token, signOptions);
+        return await this.jwt.verifyAsync<JwtPayload>(token, signOptions);
     }
 }

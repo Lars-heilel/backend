@@ -10,6 +10,7 @@ import { MessageAbstract } from './interface/message.abstract';
 import { MessagePrismaRepository } from './repository/message.prisma.repository';
 import { PrismaModule } from '@prisma/prisma.module';
 import { FriendshipModule } from '../friendship/friendship.module';
+import { ChatController } from './chat.controller';
 
 @Module({
     providers: [
@@ -20,5 +21,6 @@ import { FriendshipModule } from '../friendship/friendship.module';
         { provide: WsSessionAbstract, useClass: WsSessionRepository },
     ],
     imports: [UsersModule, NestjsJwtModule, PrismaModule, FriendshipModule],
+    controllers: [ChatController],
 })
 export class ChatModule {}
