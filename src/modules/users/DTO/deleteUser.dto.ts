@@ -3,13 +3,13 @@ import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
 export const DeleteSchema = z.object({
-    email: z.string().email('user@example.com'),
+    id: z.string().uuid('9044dcc8-7dea-4d21-8c1a-5009ac2c2ece'),
 });
 
 export class DeleteUserDTO extends createZodDto(DeleteSchema) {
     @ApiProperty({
-        description: 'User email for deletion',
-        example: 'user@example.com',
+        description: 'User id for deletion',
+        example: '9044dcc8-7dea-4d21-8c1a-5009ac2c2ece',
     })
-    email: string;
+    id: string;
 }

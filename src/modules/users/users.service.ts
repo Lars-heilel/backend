@@ -1,5 +1,6 @@
 import {
     ConflictException,
+    Inject,
     Injectable,
     Logger,
     NotFoundException,
@@ -8,18 +9,20 @@ import {
 
 import { User } from '@prisma/generated/client';
 import { FindUserDTO } from './DTO/findUsers.dto';
-import { UserRepositoryAbstract } from './repositories/user.repository.abstract';
-import { EncryptionAbstract } from 'src/core/security/encryption/encryption.abstract';
 import { CreateUserDto } from './DTO/createUser.dto';
 import { SafeUser } from './Types/user.types';
+import { UserServiceInterface } from './interface/userServiceInterface';
+import { ENCRYPTION_SERVICE, USER_REPOSITORY } from '@src/core/constants/di-token';
+import { EncryptionInterface } from '@src/core/security/encryption/interface/encryprion.interface';
+import { UserRepositoryInterface } from './interface/userRepoInterface';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements UserServiceInterface {
     private readonly logger = new Logger(UsersService.name);
 
     constructor(
-        private readonly userRepo: UserRepositoryAbstract,
-        private readonly encryption: EncryptionAbstract,
+        @Inject(USER_REPOSITORY) private readonly userRepo: UserRepositoryInterface,
+        @Inject(ENCRYPTION_SERVICE) private readonly encryption: EncryptionInterface,
     ) {}
 
     async createUser(DTO: CreateUserDto): Promise<SafeUser> {
@@ -53,20 +56,20 @@ export class UsersService {
         this.logger.log(`User registered successfully - ID: ${user.id} Email: ${user.email}`);
         return user;
     }
-    async deleteUser(email: string): Promise<{ success: string }> {
-        this.logger.debug(`Starting user deletion process for: ${email}`);
+    async deleteUser(id: string): Promise<{ success: string }> {
+        this.logger.debug(`Starting user deletion process for: ${id}`);
 
-        const user = await this.userRepo.findUserByEmail(email);
+        const user = await this.userRepo.findUserById(id);
         if (!user) {
-            this.logger.warn(`User not found for deletion: ${email}`);
+            this.logger.warn(`User not found for deletion: ${id}`);
             throw new NotFoundException('User not found');
         }
 
-        this.logger.verbose(`Deleting user ID: ${user.id} Email: ${email}`);
-        await this.userRepo.delete(email);
+        this.logger.verbose(`Deleting user ID: ${user.id} Email: ${user.email}`);
+        await this.userRepo.delete(id);
 
-        this.logger.log(`User deleted successfully - ID: ${user.id} Email: ${email}`);
-        return { success: `User ${email} deleted` };
+        this.logger.log(`User deleted successfully - ID: ${user.id}`);
+        return { success: `User ${id} deleted` };
     }
 
     async findUserByEmail(email: string): Promise<User> {
@@ -165,7 +168,7 @@ export class UsersService {
         return { success: `Password updated for ${email}` };
     }
 
-    async validateUser(email: string, password: string): Promise<Omit<User, 'password'> | null> {
+    async validateUser(email: string, password: string): Promise<SafeUser | null> {
         this.logger.debug(`Validating user: ${email}`);
 
         const user = await this.findUserByEmail(email);

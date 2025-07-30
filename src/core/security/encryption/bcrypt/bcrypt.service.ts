@@ -1,14 +1,12 @@
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/core/config/envConfig';
 import * as bcrypt from 'bcrypt';
-import { EncryptionAbstract } from '../encryption.abstract';
 import { Injectable } from '@nestjs/common';
+import { EncryptionInterface } from '../interface/encryprion.interface';
 
 @Injectable()
-export class BcryptService extends EncryptionAbstract {
-    constructor(private env: ConfigService<Env>) {
-        super();
-    }
+export class BcryptService implements EncryptionInterface {
+    constructor(private env: ConfigService<Env>) {}
 
     async hash(data: string): Promise<string> {
         const saltRounds = this.env.getOrThrow('SALT_ROUNDS', { infer: true });

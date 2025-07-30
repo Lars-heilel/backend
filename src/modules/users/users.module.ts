@@ -3,19 +3,19 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { PrismaModule } from '@prisma/prisma.module';
 import { UserPrismaRepository } from './repositories/user.prisma.repository';
-import { UserRepositoryAbstract } from './repositories/user.repository.abstract';
 import { BcryptModule } from 'src/core/security/encryption/bcrypt/bcrypt.module';
+import { USER_REPOSITORY, USER_SERVICE } from '@src/core/constants/di-token';
 
 @Module({
     controllers: [UsersController],
     providers: [
-        UsersService,
+        { provide: USER_SERVICE, useClass: UsersService },
         {
-            provide: UserRepositoryAbstract,
+            provide: USER_REPOSITORY,
             useClass: UserPrismaRepository,
         },
     ],
     imports: [PrismaModule, BcryptModule],
-    exports: [UsersService, UserRepositoryAbstract],
+    exports: [USER_SERVICE],
 })
 export class UsersModule {}

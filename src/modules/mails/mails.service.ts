@@ -1,13 +1,21 @@
-import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+    ConflictException,
+    Inject,
+    Injectable,
+    Logger,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { MailsAbstract } from 'src/core/security/mails/mails.abstract';
 import { MailTokenManagerAbstract } from 'src/core/security/mails/mailTokenManager/mail-token-manager.abstract';
 import { $endpoints, $getFrontUrl } from 'src/common/const/$frontendUrl';
 import { EmailTemplate } from 'src/core/security/mails/nodemailer/UI/EmailTemplate';
 import { SafeUser } from '../users/Types/user.types';
-import { UsersService } from '../users/users.service';
+
 import { TokensService } from '../auth/tokens/tokens.service';
 import { Response } from 'express';
 import { JwtPayload } from '../auth/tokens/types/jwt-payload';
+import { USER_SERVICE } from '@src/core/constants/di-token';
+import { UserServiceInterface } from '../users/interface/userServiceInterface';
 
 @Injectable()
 export class MailsService {
@@ -15,7 +23,7 @@ export class MailsService {
     constructor(
         private mailAbstract: MailsAbstract,
         private mailTokenManager: MailTokenManagerAbstract,
-        private usersService: UsersService,
+        @Inject(USER_SERVICE) private usersService: UserServiceInterface,
         private tokensService: TokensService,
     ) {}
 

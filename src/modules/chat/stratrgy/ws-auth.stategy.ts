@@ -1,20 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { Env } from 'src/core/config/envConfig';
-import { JwtAbstract } from 'src/core/security/jwt/jwt.abstract';
 import { JwtPayload } from 'src/modules/auth/tokens/types/jwt-payload';
 import { SafeUser } from 'src/modules/users/Types/user.types';
-import { UsersService } from 'src/modules/users/users.service';
 import { JwtTokenAuthSchema } from '../DTO/token.dto';
+import { UserServiceInterface } from '@src/modules/users/interface/userServiceInterface';
+import { JWT_SERVICE, USER_SERVICE } from '@src/core/constants/di-token';
+import { JwtServiceInterface } from '@src/core/security/jwt/interface/jwt.interface';
 
 @Injectable()
 export class WsAuthStrategy {
     private readonly logger = new Logger(WsAuthStrategy.name);
     constructor(
-        private jwt: JwtAbstract,
-        private usersService: UsersService,
+        @Inject(USER_SERVICE) private usersService: UserServiceInterface,
+        @Inject(JWT_SERVICE) private jwt: JwtServiceInterface,
+
         private env: ConfigService<Env>,
     ) {}
     async authenticate(client: Socket): Promise<SafeUser> {

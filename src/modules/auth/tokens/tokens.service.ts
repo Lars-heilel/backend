@@ -1,24 +1,24 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger, Inject } from '@nestjs/common';
 import { RefreshTokensRepositoryAbsctract } from './repositories/refreshToken/refreshTokens.repository.abstract';
-
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/core/config/envConfig';
 import { Response } from 'express';
-import { EncryptionAbstract } from 'src/core/security/encryption/encryption.abstract';
-import { JwtAbstract } from 'src/core/security/jwt/jwt.abstract';
 import { JwtPayload } from './types/jwt-payload';
-import { UsersService } from 'src/modules/users/users.service';
+import { UserServiceInterface } from '@src/modules/users/interface/userServiceInterface';
+import { ENCRYPTION_SERVICE, JWT_SERVICE, USER_SERVICE } from '@src/core/constants/di-token';
+import { EncryptionInterface } from '@src/core/security/encryption/interface/encryprion.interface';
+import { JwtServiceInterface } from '@src/core/security/jwt/interface/jwt.interface';
 
 @Injectable()
 export class TokensService {
     private readonly logger = new Logger(TokensService.name);
 
     constructor(
+        @Inject(USER_SERVICE) private readonly usersService: UserServiceInterface,
         private readonly RefreshRepo: RefreshTokensRepositoryAbsctract,
-        private jwt: JwtAbstract,
+        @Inject(JWT_SERVICE) private readonly jwt: JwtServiceInterface,
         private env: ConfigService<Env>,
-        private bcrypt: EncryptionAbstract,
-        private usersService: UsersService,
+        @Inject(ENCRYPTION_SERVICE) private readonly bcrypt: EncryptionInterface,
     ) {}
 
     async createTokens(payload: JwtPayload) {
