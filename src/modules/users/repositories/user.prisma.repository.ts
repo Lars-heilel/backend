@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '@prisma/prisma.service';
 import { CreateUserDto } from '../DTO/createUser.dto';
 import { USER_SELECT_FIELDS } from '../const/user.prisma.constants';
 import { confirmationDetails, SafeUser } from '../Types/user.types';
 import { FindUserDTO } from '../DTO/findUsers.dto';
-import { User } from 'prisma/generated';
-import { UserRepositoryAbstract } from './user.repository.abstract';
-import { PublicUserDto } from '../DTO/publicProfile.dto';
+import { User } from '@prisma/generated/client';
+import { UserRepositoryInterface } from '../interface/userRepoInterface';
 
 @Injectable()
-export class UserPrismaRepository extends UserRepositoryAbstract {
-    constructor(private prisma: PrismaService) {
-        super();
-    }
+export class UserPrismaRepository implements UserRepositoryInterface {
+    constructor(private prisma: PrismaService) {}
 
     async create(data: CreateUserDto): Promise<SafeUser> {
         return this.prisma.user.create({
@@ -24,7 +21,7 @@ export class UserPrismaRepository extends UserRepositoryAbstract {
         await this.prisma.user.delete({ where: { email } });
         return { success: 'User deleted' };
     }
-    async publicFindUsers(data: FindUserDTO): Promise<PublicUserDto[]> {
+    async publicFindUsers(data: FindUserDTO): Promise<SafeUser[]> {
         const user = await this.prisma.user.findFirst({
             where: {
                 isConfirmed: true,

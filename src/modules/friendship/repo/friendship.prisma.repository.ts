@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '@prisma/prisma.service';
 import { FriendshipRepositoryAbstract } from './friendship.repository.abstract';
-import { Friendship, FriendshipStatus } from 'prisma/generated';
+import { Friendship, FriendshipStatus } from '@prisma/generated/client';
 
 @Injectable()
 export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {

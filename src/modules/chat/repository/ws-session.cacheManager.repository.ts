@@ -18,7 +18,6 @@ export class WsSessionRepository extends WsSessionAbstract {
         this.logger.debug(`Saving session: user=${userId}, socket=${socketId}`);
 
         try {
-            // Используем транзакцию для атомарности операций
             await this.redis
                 .multi()
                 .hset(this.SOCKET_USER_MAP_KEY, socketId, userId)
@@ -26,9 +25,11 @@ export class WsSessionRepository extends WsSessionAbstract {
                 .exec();
 
             this.logger.debug(`Session saved successfully`);
-        } catch (error) {
-            this.logger.error(`Failed to save session: ${error.message}`);
-            throw new WsException('Failed to save session');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                this.logger.error(`Failed to save session: ${error.message}`);
+                throw new WsException('Failed to save session');
+            }
         }
     }
 
@@ -43,7 +44,6 @@ export class WsSessionRepository extends WsSessionAbstract {
                 return;
             }
 
-            // Атомарное удаление
             await this.redis
                 .multi()
                 .hdel(this.SOCKET_USER_MAP_KEY, socketId)
@@ -51,8 +51,11 @@ export class WsSessionRepository extends WsSessionAbstract {
                 .exec();
 
             this.logger.debug(`Session removed successfully`);
-        } catch (error) {
-            this.logger.error(`Failed to remove session: ${error.message}`);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                this.logger.error(`Failed to remove session: ${error.message}`);
+                throw new WsException('Failed to remove session');
+            }
         }
     }
 
@@ -68,13 +71,16 @@ export class WsSessionRepository extends WsSessionAbstract {
 
     async getUserSockets(userId: string): Promise<string[]> {
         try {
-            // Используем Set для хранения сокетов пользователя
             const sockets = await this.redis.smembers(`${this.USER_SESSIONS_KEY}:${userId}`);
             this.logger.debug(`Found ${sockets.length} sockets for user ${userId}`);
             return sockets;
-        } catch (error) {
-            this.logger.error(`Failed to get user sockets: ${error.message}`);
-            return [];
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                this.logger.error(`Failed to get user sockets: ${error.message}`);
+                throw new WsException(`Failed to get user sockets: ${error.message}`);
+            }
+            this.logger.error(`An unknown error occurred while getting user sockets.`);
+            throw new WsException('An unknown error occurred while getting user sockets.');
         }
     }
 }

@@ -1,4 +1,3 @@
-// @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
@@ -17,7 +16,7 @@ export default tseslint.config(
                 ...globals.node,
                 ...globals.jest,
             },
-            ecmaVersion: 5,
+
             sourceType: 'module',
             parserOptions: {
                 projectService: true,
@@ -30,6 +29,20 @@ export default tseslint.config(
             '@typescript-eslint/no-explicit-any': 'off',
             '@typescript-eslint/no-floating-promises': 'warn',
             '@typescript-eslint/no-unsafe-argument': 'warn',
+            '@typescript-eslint/no-unused-vars': [
+                'warn',
+                {
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                },
+            ],
+        },
+    },
+    {
+        files: ['**/*.spec.ts', '**/test/**/*.ts'],
+        rules: {
+            '@typescript-eslint/unbound-method': 'off',
         },
     },
 );

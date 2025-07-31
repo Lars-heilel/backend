@@ -5,73 +5,50 @@ import { ResetPasswordDto, ResetPasswordSchema } from './DTO/ResetPassword.dto';
 import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
 import { ResendConfirmationDto, ResendConfirmationDtoSchema } from './DTO/resend-confirmation.dto';
 import { ForgotPasswordDto, ForgotPasswordDtoSchema } from './DTO/forgot-password.dto';
-import { SwaggerDocumentation } from 'src/common/decorators/swagger/swagger.decorator';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
 
+@ApiTags('Mails')
 @Controller('mails')
 export class MailsController {
     constructor(private readonly mailsService: MailsService) {}
 
     @Post('resend-confirmation')
-    @SwaggerDocumentation({
-        operations: { summary: 'Resend confirmation email' },
-        responses: [
-            {
-                status: 200,
-                description: 'Confirmation email has been resent',
-            },
-            { status: 401, description: 'User not found' },
-            { status: 409, description: 'Account already confirmed' },
-        ],
-    })
     @UsePipes(new ZodValidationPipe(ResendConfirmationDtoSchema))
-    async resendConfirmation(@Body() DTO: ResendConfirmationDto) {
+    @ApiOperation({ summary: 'Resend confirmation email' })
+    @ApiResponse({ status: 200, description: 'Confirmation email has been resent' })
+    @ApiBody({ type: ResendConfirmationDto })
+    async resendConfirmation(@Body() DTO: ResendConfirmationDto): Promise<{ message: string }> {
         await this.mailsService.resendConfirmationEmail(DTO.email);
         return { message: 'Confirmation email has been resent' };
     }
+
     @Get('verify-account')
-    @SwaggerDocumentation({
-        operations: { summary: 'Verify user account' },
-        responses: [
-            {
-                status: 200,
-                description: 'Account verified and tokens issued',
-            },
-            { status: 401, description: 'Invalid token' },
-            { status: 409, description: 'Account already confirmed' },
-        ],
-    })
+    @ApiOperation({ summary: 'Verify account by token' })
+    @ApiQuery({ name: 'token', type: String, required: true })
+    @ApiResponse({ status: 200, description: 'Account successfully verified' })
     async verifyAccount(@Query('token') token: string, @Res({ passthrough: true }) res: Response) {
         return await this.mailsService.verifyAccount(token, res);
     }
+
     @Post('forgot-password')
-    @SwaggerDocumentation({
-        operations: { summary: 'Request password reset' },
-        responses: [
-            {
-                status: 200,
-                description: 'Reset instructions sent if account exists',
-            },
-            { status: 401, description: 'User not found' },
-        ],
-    })
     @UsePipes(new ZodValidationPipe(ForgotPasswordDtoSchema))
-    async forgotPassword(@Body() DTO: ForgotPasswordDto) {
+    @ApiOperation({ summary: 'Send password reset email' })
+    @ApiResponse({ status: 200, description: 'If account exists, reset instructions were sent' })
+    @ApiBody({ type: ForgotPasswordDto })
+    async forgotPassword(@Body() DTO: ForgotPasswordDto): Promise<{ message: string }> {
         await this.mailsService.sendResetPasswordEmail(DTO.email);
         return { message: 'If account exists, reset instructions were sent' };
     }
 
     @Put('reset-password')
-    @SwaggerDocumentation({
-        operations: { summary: 'Reset user password' },
-        responses: [
-            { status: 200, description: 'Password successfully changed' },
-            { status: 401, description: 'Invalid token' },
-        ],
-    })
+    @ApiOperation({ summary: 'Reset password by token' })
+    @ApiQuery({ name: 'token', type: String, required: true })
+    @ApiResponse({ status: 200, description: 'Password successfully changed' })
+    @ApiBody({ type: ResetPasswordDto })
     async resetPassword(
         @Query('token') token: string,
         @Body(new ZodValidationPipe(ResetPasswordSchema)) DTO: ResetPasswordDto,
-    ) {
+    ): Promise<{ message: string }> {
         await this.mailsService.resetPassword(token, DTO.password);
         return { message: 'Password successfully changed' };
     }

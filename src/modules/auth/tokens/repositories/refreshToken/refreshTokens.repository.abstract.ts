@@ -1,4 +1,4 @@
-import { Token } from 'prisma/generated';
+import { Token } from '@prisma/generated/client';
 
 export abstract class RefreshTokensRepositoryAbsctract {
     abstract createRefreshToken(data: {

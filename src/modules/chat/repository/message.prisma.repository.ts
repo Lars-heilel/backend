@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { MessageAbstract } from '../interface/message.abstract';
-import { Message } from 'prisma/generated';
-import { PrismaService } from 'prisma/prisma.service';
+import { Message } from '@prisma/generated/client';
+import { PrismaService } from '@prisma/prisma.service';
+import { HistoryDto } from '../DTO/history.dto';
 
 @Injectable()
 export class MessagePrismaRepository extends MessageAbstract {
@@ -11,12 +12,8 @@ export class MessagePrismaRepository extends MessageAbstract {
     async saveMessage(senderId: string, receiverId: string, content: string): Promise<Message> {
         return await this.prisma.message.create({ data: { senderId, receiverId, content } });
     }
-    async getHistory(
-        userId: string,
-        secondUserId: string,
-        limit: number,
-        cursor: { id: string; createAt: Date } | null,
-    ): Promise<Message[]> {
+    async getHistory(dto: HistoryDto): Promise<Message[]> {
+        const { userId, secondUserId, cursor, limit } = dto;
         return await this.prisma.message.findMany({
             where: {
                 OR: [
