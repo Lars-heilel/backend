@@ -1,0 +1,16 @@
+.github
+.git
+.idea
+
+node_modules
+prisma/generated
+
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+#env
+.env
+.env.example
+
+README.md

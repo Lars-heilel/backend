@@ -9,7 +9,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
             Logger.log('DB ONLINE');
         } catch (error) {
             Logger.log('DB Offline', error);
-            process.exit(1);
+            // process.exit(1);
         }
     }
     async onModuleDestroy() {
