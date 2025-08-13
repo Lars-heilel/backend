@@ -1,6 +1,6 @@
 import { Controller, Delete, UsePipes, Get, Query, UseGuards, Req, Inject } from '@nestjs/common';
 import { FindUserDTO, FindUserSchema } from './DTO/findUsers.dto';
-import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiCookieAuth } from '@nestjs/swagger';
 import { JwtUser } from '../auth/tokens/types/jwt-req';

@@ -13,7 +13,7 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { WsAuthStrategy } from './stratrgy/ws-auth.stategy';
 import { SafeUser } from '../users/Types/user.types';
-import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
+import { ZodValidationPipe } from "nestjs-zod"
 import { SendMessageSchema } from './DTO/sendMessage.dto';
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

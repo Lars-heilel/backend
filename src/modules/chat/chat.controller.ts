@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards, UsePipes, HttpStatus } from '@nestjs
 import { ChatService } from './chat.service';
 import { Message } from '@prisma/generated/client';
 import { HistoriSchema, HistoryDto } from './DTO/history.dto';
-import { ZodValidationPipe } from '@src/common/pipes/zod.validation.pipe';
+import {ZodValidationPipe} from 'nestjs-zod';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 

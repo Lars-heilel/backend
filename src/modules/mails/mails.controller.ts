@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Put, Query, Res, UsePipes } from '@nestjs/
 import { MailsService } from './mails.service';
 import { Response } from 'express';
 import { ResetPasswordDto, ResetPasswordSchema } from './DTO/ResetPassword.dto';
-import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { ResendConfirmationDto, ResendConfirmationDtoSchema } from './DTO/resend-confirmation.dto';
 import { ForgotPasswordDto, ForgotPasswordDtoSchema } from './DTO/forgot-password.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';

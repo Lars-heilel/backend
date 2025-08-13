@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { LoginDto, LoginSchema } from './DTO/LoginUserDto';
 import { CreateUserDto, CreateUserSchema } from '../users/DTO/createUser.dto';
 import {

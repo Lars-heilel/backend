@@ -20,7 +20,7 @@ import {
     ApiSecurity,
 } from '@nestjs/swagger';
 import { FriendshipService } from './friendship.service';
-import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { UpdateFriendshipStatusDto, UpdateFriendshipStatusSchema } from './DTO/update-status.dto';
 import { SendFriendRequestDto, SendFriendRequestSchema } from './DTO/send-request.dto';
 import { AuthGuard } from '@nestjs/passport';
