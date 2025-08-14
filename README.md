@@ -39,16 +39,7 @@ Create .env file based on .env.example:
 ```bash
 npm install
 ```
-### 4. Start services with Docker
-```bash
-docker compose up -d
-```
-### 5. Database setup
-```bash
-npx prisma migrate dev
-npx prisma generate
-```
-### 6. Nodemailer Configuration
+### 4. Nodemailer Configuration
 Set up your SMTP provider:
 
 Use smpt providers (google/yandex)... 
@@ -59,12 +50,27 @@ NODEMAILER_HOST=smtp.gmail.com
 NODEMAILER_EMAIL=youremail@gmail.com
 NODEMAILER_PASSWORD=your-app-password
 ```
-For Gmail: Enable "Less secure apps" or use app-specific password
-
-###7. Start the application
+### 5. launching an application for development
+For Dev 
 ```bash
-npm run:start:dev
+ npm run docker:up:dev 
 ```
+migrate
+```bash
+ npm run prisma:deploy
+```
+
+```bash
+ npm run start:dev
+ ```
+
+### 5. launching an application for production
+For Prod 
+```bash 
+npm run docker:prod
+```
+
+
 
 The application adheres to SOLID principles, which allows for easy replacement of any library, be it an ORM or something else.
 
