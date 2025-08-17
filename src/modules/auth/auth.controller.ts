@@ -12,6 +12,7 @@ import {
     UsePipes,
     UnauthorizedException,
     HttpStatus,
+    ForbiddenException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
@@ -98,7 +99,7 @@ export class AuthController {
 
         const parsedToken = await RefreshTokenSchema.safeParseAsync(token);
         if (!parsedToken.success) {
-            throw new UnauthorizedException('Invalid refresh token format');
+            throw new ForbiddenException('Invalid refresh token format');
         }
         return await this.authService.refresh(parsedToken.data, res);
     }

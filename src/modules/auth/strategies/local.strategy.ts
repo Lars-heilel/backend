@@ -1,6 +1,6 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
 
 import { USER_SERVICE } from '@src/core/constants/di-token';
 import { UserServiceInterface } from '@src/modules/users/interface/userServiceInterface';
@@ -19,7 +19,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         const user = await this.usersService.validateUser(email, password);
         if (!user) {
             this.logger.warn(`Authentication failed: ${email}`);
-            throw new UnauthorizedException();
+            throw new ForbiddenException();
         }
         this.logger.log(`User authenticated: ${email}`);
         return user;

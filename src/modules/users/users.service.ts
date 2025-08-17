@@ -1,5 +1,6 @@
 import {
     ConflictException,
+    ForbiddenException,
     Inject,
     Injectable,
     Logger,
@@ -174,13 +175,13 @@ export class UsersService implements UserServiceInterface {
         const user = await this.findUserByEmail(email);
         if (!user.isConfirmed) {
             this.logger.warn(`Validation failed - account not confirmed: ${email}`);
-            throw new UnauthorizedException('Account not confirmed');
+            throw new ForbiddenException('Account not confirmed');
         }
 
         const passwordValid = await this.encryption.compare(password, user.password);
         if (!passwordValid) {
             this.logger.warn(`Validation failed - invalid password for: ${email}`);
-            throw new UnauthorizedException('Invalid credentials');
+            throw new ForbiddenException('Invalid credentials');
         }
 
         this.logger.verbose(`User validated successfully: ${email}`);

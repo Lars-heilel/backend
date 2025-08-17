@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger, Inject, ForbiddenException } from '@nestjs/common';
 import { RefreshTokensRepositoryAbsctract } from './repositories/refreshToken/refreshTokens.repository.abstract';
 import { ConfigService } from '@nestjs/config';
 import { Env } from 'src/core/config/envConfig';
@@ -75,19 +75,19 @@ export class TokensService {
 
         if (payload.sub !== user.id) {
             this.logger.warn(`Invalid token subject for user: ${user.id}`);
-            throw new UnauthorizedException('Invalid token subject');
+            throw new ForbiddenException('Invalid token subject');
         }
 
         const storedToken = await this.RefreshRepo.findRefreshToken(user.id);
         if (!storedToken) {
             this.logger.warn(`Token not found for user: ${user.id}`);
-            throw new UnauthorizedException('Token not found');
+            throw new ForbiddenException('Token not found');
         }
 
         const isValidToken = await this.bcrypt.compare(token, storedToken.refreshToken);
         if (!isValidToken) {
             this.logger.warn(`Invalid token for user: ${user.id}`);
-            throw new UnauthorizedException('Invalid token');
+            throw new ForbiddenException('Invalid token');
         }
 
         const currentTime = Date.now();
@@ -95,7 +95,7 @@ export class TokensService {
         if (tokenExpiration < currentTime) {
             this.logger.warn(`Token expired for user: ${user.id}`);
             await this.RefreshRepo.deleteRefreshToken(user.id);
-            throw new UnauthorizedException('Token expired');
+            throw new ForbiddenException('Token expired');
         }
         this.logger.log(`Refresh token validated for user: ${user.id}`);
         return { sub: user.id, email: user.email };
