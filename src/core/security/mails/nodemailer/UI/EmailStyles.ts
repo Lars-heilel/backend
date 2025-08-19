@@ -1,28 +1,27 @@
 export const EmailStyles = {
-    // Общие стили
+    body: 'margin: 0; padding: 0; width: 100%; background-color: #f2f4f6;',
+    wrapper:
+        'width: 100%; table-layout: fixed; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;',
     container:
-        'max-width: 600px; margin: 20px auto; padding: 30px; background-color: #f8f9fa; border-radius: 10px; font-family: Arial, sans-serif;',
+        'max-width: 600px; margin: 20px auto; padding: 30px; background-color: #ffffff; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; box-shadow: 0 4px 12px rgba(0,0,0,0.1);',
 
-    // Стили для письма сброса пароля
     resetPassword: {
-        header: 'color: #2c3e50; text-align: center; margin-bottom: 25px; font-size: 24px; border-bottom: 2px solid #e74c3c; padding-bottom: 10px;',
-        button: 'background-color: #e74c3c;',
+        header: 'color: #1d2a39; text-align: center; margin-bottom: 25px; font-size: 26px; font-weight: bold; border-bottom: 1px solid #e8eaed; padding-bottom: 15px;',
+        button: 'background-color: #ff4d4d;',
     },
-
-    // Стили для письма подтверждения email
     confirmEmail: {
-        header: 'color: #2c3e50; text-align: center; margin-bottom: 25px; font-size: 24px; border-bottom: 2px solid #3498db; padding-bottom: 10px;',
-        button: 'background-color: #3498db;',
+        header: 'color: #1d2a39; text-align: center; margin-bottom: 25px; font-size: 26px; font-weight: bold; border-bottom: 1px solid #e8eaed; padding-bottom: 15px;',
+        button: 'background-color: #007bff;',
     },
 
-    // Общие стили для контента
-    contentBox:
-        'padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);',
-    mainText: 'color: #34495e; line-height: 1.6; margin-bottom: 20px;',
-    buttonContainer: 'text-align: center; margin: 25px 0;',
+    contentBox: 'padding: 20px 10px; background-color: #ffffff; border-radius: 8px;',
+    mainText:
+        'color: #333333; line-height: 1.6; margin-bottom: 25px; font-size: 16px; text-align: center;',
+    buttonContainer: 'text-align: center; margin: 30px 0;',
     buttonBase:
-        'display: inline-block; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background-color 0.3s;',
-    expirationText: 'color: #7f8c8d; font-size: 14px; text-align: center; margin-top: 25px;',
-    expirationHighlight: 'color: #e74c3c; font-weight: bold;',
+        'display: inline-block; color: white !important; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background-color 0.3s; font-size: 16px;',
+    expirationText: 'color: #6c757d; font-size: 14px; text-align: center; margin-top: 25px;',
+    expirationHighlight: 'color: #dc3545; font-weight: bold;',
     footerText: 'color: #95a5a6; font-size: 12px; text-align: center; margin-top: 30px;',
+    logo: 'display: block; margin: 0 auto 20px; height: 50px; width: auto;',
 };

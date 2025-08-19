@@ -33,11 +33,11 @@ export class MailsController {
     @Post('forgot-password')
     @UsePipes(new ZodValidationPipe(ForgotPasswordDtoSchema))
     @ApiOperation({ summary: 'Send password reset email' })
-    @ApiResponse({ status: 200, description: 'If account exists, reset instructions were sent' })
+    @ApiResponse({ status: 200, description: 'To change your password, check your email' })
     @ApiBody({ type: ForgotPasswordDto })
     async forgotPassword(@Body() DTO: ForgotPasswordDto): Promise<{ message: string }> {
         await this.mailsService.sendResetPasswordEmail(DTO.email);
-        return { message: 'If account exists, reset instructions were sent' };
+        return { message: 'To change your password, check your email' };
     }
 
     @Put('reset-password')

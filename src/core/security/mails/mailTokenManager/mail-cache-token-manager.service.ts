@@ -1,5 +1,5 @@
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { MailTokenManagerAbstract } from './mail-token-manager.abstract';
 import { MailTokenType } from '../types/mail-token-manager.type';
@@ -49,7 +49,7 @@ export class CacheTokenManager extends MailTokenManagerAbstract {
                 tokenPrefix: token.substring(0, 8),
                 type,
             });
-            throw new Error('Invalid or expired token');
+            throw new ForbiddenException('Invalid or expired token');
         }
 
         this.logger.verbose(`Token validated for user ${user.id}`);

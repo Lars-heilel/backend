@@ -91,7 +91,7 @@ export class MailsService {
         this.tokensService.setRefreshTokenCookie(res, refresh_token);
 
         this.logger.log(`Account successfully verified: ${user.email}`);
-        return { token: access_token, user: user };
+        return { token: access_token };
     }
 
     async resetPassword(token: string, newPassword: string) {

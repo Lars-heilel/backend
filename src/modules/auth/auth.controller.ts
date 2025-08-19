@@ -61,7 +61,7 @@ export class AuthController {
     async login(
         @Req() req: { user: SafeUser },
         @Res({ passthrough: true }) res: Response,
-    ): Promise<{ token: string; user: SafeUser }> {
+    ): Promise<{ token: string }> {
         return await this.authService.login(req.user, res);
     }
 
@@ -94,7 +94,7 @@ export class AuthController {
     async refreshTokens(
         @Req() req: Request,
         @Res({ passthrough: true }) res: Response,
-    ): Promise<string> {
+    ): Promise<{ token: string }> {
         const token: unknown = req.cookies['refreshToken'];
 
         const parsedToken = await RefreshTokenSchema.safeParseAsync(token);

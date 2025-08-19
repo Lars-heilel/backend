@@ -21,20 +21,20 @@ export class AuthService {
         await this.mailsService.sendConfirmationEmail(user);
         return { message: 'To complete registration, confirm your account via your email' };
     }
-    async login(user: SafeUser, res: Response): Promise<{ token: string; user: SafeUser }> {
+    async login(user: SafeUser, res: Response): Promise<{ token: string }> {
         const payload: JwtPayload = { sub: user.id, email: user.email };
         const { access_token, refresh_token } = await this.tokenService.createTokens(payload);
         this.tokenService.setRefreshTokenCookie(res, refresh_token);
-        return { token: access_token, user: user };
+        return { token: access_token };
     }
     async logout(userId: string): Promise<{ message: string }> {
         await this.tokenService.revokeRefreshToken(userId);
         return { message: 'logout successful' };
     }
-    async refresh(token: string, res: Response): Promise<string> {
+    async refresh(token: string, res: Response): Promise<{ token: string }> {
         const payload = await this.tokenService.validateRefreshToken(token);
         const { access_token, refresh_token } = await this.tokenService.createTokens(payload);
         this.tokenService.setRefreshTokenCookie(res, refresh_token);
-        return access_token;
+        return { token: access_token };
     }
 }
