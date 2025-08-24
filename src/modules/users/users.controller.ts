@@ -35,4 +35,15 @@ export class UsersController {
     async publicFindUsers(@Query() data: FindUserDTO) {
         return await this.usersService.publicFindUsers(data);
     }
+    @Get('/profile')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOperation({ summary: 'Get my profile' })
+    @ApiResponse({ status: 200, description: 'My profile' })
+    @ApiResponse({ status: 400, description: 'Bad Request' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiBearerAuth('access-token')
+    @ApiCookieAuth('refresh-token')
+    async getProfile(@Req() req: { user: JwtUser }) {
+        return await this.usersService.getProfile(req.user.sub);
+    }
 }

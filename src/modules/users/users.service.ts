@@ -188,4 +188,7 @@ export class UsersService implements UserServiceInterface {
         const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
     }
+    async getProfile(userId: string) {
+        return await this.userRepo.getProfile(userId);
+    }
 }

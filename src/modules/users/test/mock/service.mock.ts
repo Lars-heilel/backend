@@ -11,6 +11,7 @@ export const mockUserRepo: jest.Mocked<UserRepositoryInterface> = {
     accountConfirmation: jest.fn(),
     isConfirmed: jest.fn(),
     updatePassword: jest.fn(),
+    getProfile: jest.fn(),
 };
 
 export const mockEncryption: jest.Mocked<EncryptionInterface> = {

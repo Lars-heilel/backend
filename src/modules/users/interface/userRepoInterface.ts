@@ -15,4 +15,5 @@ export interface UserRepositoryInterface {
         email: string,
         newHashedPassword: string,
     ): Promise<{ success: 'Password changed' }>;
+    getProfile(userId: string): Promise<SafeUser | null>;
 }

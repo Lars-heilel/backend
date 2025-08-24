@@ -65,4 +65,10 @@ export class UserPrismaRepository implements UserRepositoryInterface {
         });
         return { success: 'Password changed' };
     }
+    async getProfile(userId: string): Promise<SafeUser | null> {
+        return await this.prisma.user.findFirst({
+            where: { id: userId },
+            select: USER_SELECT_FIELDS,
+        });
+    }
 }
