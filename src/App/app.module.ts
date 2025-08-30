@@ -9,9 +9,10 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { ChatModule } from 'src/modules/chat/chat.module';
 import { FriendshipModule } from 'src/modules/friendship/friendship.module';
 import { UsersModule } from 'src/modules/users/users.module';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
 @Module({
     imports: [
+        EventEmitterModule.forRoot(),
         RedisModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: (env: ConfigService<Env>) => ({

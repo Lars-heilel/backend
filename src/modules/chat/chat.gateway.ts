@@ -13,8 +13,9 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { WsAuthStrategy } from './stratrgy/ws-auth.stategy';
 import { SafeUser } from '../users/Types/user.types';
-import { ZodValidationPipe } from "nestjs-zod"
 import { SendMessageSchema } from './DTO/sendMessage.dto';
+import { ZodValidationPipe } from 'nestjs-zod';
+import { OnEvent } from '@nestjs/event-emitter';
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
@@ -79,6 +80,67 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         for (const socketId of receiverSockets) {
             this.server.to(socketId).emit('new_message', savedMessage);
+        }
+    }
+    @OnEvent('friendship.rejected')
+    async handleFriendshipRejected(payload: {
+        requesterId: string;
+        addresseeId: string;
+        friendshipId: string;
+    }) {
+        this.logger.log(`Friendship rejected event for user ${payload.requesterId}`);
+        const requesterSockets = await this.chatService.getUserSockets(payload.requesterId);
+        for (const socketId of requesterSockets) {
+            this.server.to(socketId).emit('friendship_request_rejected', {
+                by: payload.addresseeId,
+                friendshipId: payload.friendshipId,
+            });
+        }
+    }
+
+    @OnEvent('friendship.deleted')
+    async handleFriendshipDeleted(payload: {
+        deletedBy: string;
+        notifiedUser: string;
+        friendshipId: string;
+    }) {
+        this.logger.log(`Friendship deleted event for user ${payload.notifiedUser}`);
+        const notifiedUserSockets = await this.chatService.getUserSockets(payload.notifiedUser);
+        for (const socketId of notifiedUserSockets) {
+            this.server.to(socketId).emit('friendship_deleted', {
+                by: payload.deletedBy,
+                friendshipId: payload.friendshipId,
+            });
+        }
+    }
+    @OnEvent('friendship.requested')
+    async handleFriendshipRequested(payload: {
+        requesterId: string;
+        addresseeId: string;
+        friendshipId: string;
+    }) {
+        this.logger.log(`Friendship request event for user ${payload.addresseeId}`);
+        const receiverSockets = await this.chatService.getUserSockets(payload.addresseeId);
+        for (const socketId of receiverSockets) {
+            this.server.to(socketId).emit('friendship_request_received', {
+                from: payload.requesterId,
+                friendshipId: payload.friendshipId,
+            });
+        }
+    }
+    @OnEvent('friendship.accepted')
+    async handleFriendshipAccepted(payload: {
+        requesterId: string;
+        addresseeId: string;
+        friendshipId: string;
+    }) {
+        this.logger.log(`Friendship accepted event for user ${payload.requesterId}`);
+        const requesterSockets = await this.chatService.getUserSockets(payload.requesterId);
+        for (const socketId of requesterSockets) {
+            this.server.to(socketId).emit('friendship_request_accepted', {
+                by: payload.addresseeId,
+                friendshipId: payload.friendshipId,
+            });
         }
     }
 }
