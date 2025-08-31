@@ -46,11 +46,7 @@ export class FriendshipService {
         this.logger.verbose(`Creating new friend request`);
         const request = await this.repository.createRequest(requesterId, addresseeId);
 
-        this.eventEmitter.emit('friendship.requested', {
-            requesterId,
-            addresseeId,
-            friendshipId: request.id,
-        });
+        this.eventEmitter.emit('friendship.requested', request);
         this.logger.log(
             `Friend request created (ID: ${request.id}) from ${requesterId} to ${addresseeId}`,
         );
@@ -93,22 +89,14 @@ export class FriendshipService {
         if (type === 'REJECTED') {
             this.logger.verbose(`Rejecting request ${friendshipId}`);
             await this.repository.delete(friendshipId);
-            this.eventEmitter.emit('friendship.rejected', {
-                requesterId: request.requesterId,
-                addresseeId: userId,
-                friendshipId: request.id,
-            });
+            this.eventEmitter.emit('friendship.rejected', request);
             this.logger.log(`Request rejected: ${friendshipId}`);
             return { message: 'Request rejected' };
         }
 
         this.logger.verbose(`Accepting request ${friendshipId}`);
         const result = await this.repository.updateStatus(friendshipId, type);
-        this.eventEmitter.emit('friendship.accepted', {
-            requesterId: request.requesterId,
-            addresseeId: userId,
-            friendshipId: result.id,
-        });
+        this.eventEmitter.emit('friendship.accepted', result);
         this.logger.log(
             `Friendship accepted: ${friendshipId} between ${request.requesterId} and ${request.addresseeId}`,
         );

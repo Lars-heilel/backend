@@ -30,6 +30,12 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
                     { requesterId: user2, addresseeId: user1 },
                 ],
             },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
     async getFriendList(userId: string): Promise<Friendship[]> {
@@ -67,6 +73,12 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
         return this.prisma.friendship.update({
             where: { id },
             data: { status },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
 

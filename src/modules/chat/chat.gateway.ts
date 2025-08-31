@@ -16,6 +16,7 @@ import { SafeUser } from '../users/Types/user.types';
 import { SendMessageSchema } from './DTO/sendMessage.dto';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { OnEvent } from '@nestjs/event-emitter';
+import { Friendship } from '@prisma/generated/client';
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
@@ -83,17 +84,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
     @OnEvent('friendship.rejected')
-    async handleFriendshipRejected(payload: {
-        requesterId: string;
-        addresseeId: string;
-        friendshipId: string;
-    }) {
+    async handleFriendshipRejected(payload: Friendship) {
         this.logger.log(`Friendship rejected event for user ${payload.requesterId}`);
         const requesterSockets = await this.chatService.getUserSockets(payload.requesterId);
         for (const socketId of requesterSockets) {
             this.server.to(socketId).emit('friendship_request_rejected', {
-                by: payload.addresseeId,
-                friendshipId: payload.friendshipId,
+                friendshipId: payload.id,
             });
         }
     }
@@ -108,39 +104,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const notifiedUserSockets = await this.chatService.getUserSockets(payload.notifiedUser);
         for (const socketId of notifiedUserSockets) {
             this.server.to(socketId).emit('friendship_deleted', {
-                by: payload.deletedBy,
                 friendshipId: payload.friendshipId,
             });
         }
     }
+
     @OnEvent('friendship.requested')
-    async handleFriendshipRequested(payload: {
-        requesterId: string;
-        addresseeId: string;
-        friendshipId: string;
-    }) {
+    async handleFriendshipRequested(payload: Friendship) {
         this.logger.log(`Friendship request event for user ${payload.addresseeId}`);
         const receiverSockets = await this.chatService.getUserSockets(payload.addresseeId);
         for (const socketId of receiverSockets) {
-            this.server.to(socketId).emit('friendship_request_received', {
-                from: payload.requesterId,
-                friendshipId: payload.friendshipId,
-            });
+            // 3. ОТПРАВЛЯЕМ ПОЛНЫЙ ОБЪЕКТ
+            this.server.to(socketId).emit('friendship_request_received', payload);
         }
     }
+
     @OnEvent('friendship.accepted')
-    async handleFriendshipAccepted(payload: {
-        requesterId: string;
-        addresseeId: string;
-        friendshipId: string;
-    }) {
+    async handleFriendshipAccepted(payload: Friendship) {
         this.logger.log(`Friendship accepted event for user ${payload.requesterId}`);
         const requesterSockets = await this.chatService.getUserSockets(payload.requesterId);
         for (const socketId of requesterSockets) {
-            this.server.to(socketId).emit('friendship_request_accepted', {
-                by: payload.addresseeId,
-                friendshipId: payload.friendshipId,
-            });
+            this.server.to(socketId).emit('friendship_request_accepted', payload);
         }
     }
 }
