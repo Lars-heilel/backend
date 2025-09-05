@@ -5,9 +5,9 @@ model Message {
     updatedAt  DateTime @updatedAt
     read       Boolean  @default(false)
     content    String
-    sender  User @relation( fields: [senderId], references: [id],onDelete: Cascade)
-    //chatRoom
+    
+    sender  User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+    
     chatRoomId String 
-    chatRoom ChatRoom @relation(fields: [chatRoomId],references: [id],onDelete: Cascade)
-
+    chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
 }

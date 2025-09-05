@@ -1,7 +1,7 @@
 model ChatRoomParticipant  {
     userId String 
     chatRoomId String
-    chatRoom ChatRoom @relation(fields: [chatRoomId],references: [id],onDelete: Cascade)
-    user User @relation( fields: [userId], references: [id],onDelete: Cascade)
-    @@id([userId,chatRoomId])
+    chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    @@id([userId, chatRoomId])
 }

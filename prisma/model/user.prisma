@@ -11,7 +11,7 @@ model User {
   sendRequest      Friendship[] @relation("FriendRequests")
   receivedRequests Friendship[] @relation("FriendReceivers")
   //ChatRoomParticpant
-  participant ChatRoomParticipant[] 
+  chatRoomParticipants ChatRoomParticipant[] 
   //MessageModel
   sentMessage      Message[]
   lastSeen         DateTime?
