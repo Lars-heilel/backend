@@ -1,21 +1,22 @@
 import { Module } from '@nestjs/common';
-import { ChatService } from './chat.service';
-import { ChatGateway } from './chat.gateway';
 import { UsersModule } from '../users/users.module';
 import { NestjsJwtModule } from 'src/core/security/jwt/nestjs-jwt/nestjs-jwt.module';
 import { WsSessionRepository } from './repository/ws-session.cacheManager.repository';
-import { WsSessionAbstract } from './interface/ws-sessoin.abstract';
 import { WsAuthStrategy } from './stratrgy/ws-auth.stategy';
 import { PrismaModule } from '@prisma/prisma.module';
 import { MessageModule } from '../message/message.module';
+import { WS_SESSION_INRERFACE } from './interface/wsSessionRepoInterface';
+import { SESSION_SERVICE_INTERFACE } from './interface/sessionServiceInterface';
+import { SessionService } from './session.service';
+import { AppGateway } from './app.gateway';
 
 @Module({
     providers: [
-        ChatGateway,
-        ChatService,
+        AppGateway,
         WsAuthStrategy,
-        { provide: WsSessionAbstract, useClass: WsSessionRepository },
+        { provide: WS_SESSION_INRERFACE, useClass: WsSessionRepository },
+        { provide: SESSION_SERVICE_INTERFACE, useClass: SessionService },
     ],
     imports: [UsersModule, NestjsJwtModule, PrismaModule, MessageModule],
 })
-export class ChatModule {}
+export class AppGatewayModule {}

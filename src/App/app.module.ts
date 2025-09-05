@@ -6,10 +6,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '@prisma/prisma.module';
 import { Env, validate } from 'src/core/config/envConfig';
 import { AuthModule } from 'src/modules/auth/auth.module';
-import { ChatModule } from 'src/modules/chat/chat.module';
 import { FriendshipModule } from 'src/modules/friendship/friendship.module';
 import { UsersModule } from 'src/modules/users/users.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AppGatewayModule } from '@src/modules/app_gateway/app-gateway.module';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -35,7 +35,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         UsersModule,
         AuthModule,
         FriendshipModule,
-        ChatModule,
+        AppGatewayModule,
     ],
 })
 export class AppModule {}
