@@ -5,7 +5,6 @@ import {
     Injectable,
     Logger,
     NotFoundException,
-    UnauthorizedException,
 } from '@nestjs/common';
 
 import { User } from '@prisma/generated/client';

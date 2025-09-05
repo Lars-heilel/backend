@@ -114,7 +114,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`Friendship request event for user ${payload.addresseeId}`);
         const receiverSockets = await this.chatService.getUserSockets(payload.addresseeId);
         for (const socketId of receiverSockets) {
-            // 3. ОТПРАВЛЯЕМ ПОЛНЫЙ ОБЪЕКТ
             this.server.to(socketId).emit('friendship_request_received', payload);
         }
     }

@@ -30,7 +30,7 @@ export class MailsService {
     async sendConfirmationEmail(user: SafeUser) {
         this.logger.debug(`Starting confirmation email sending for user: ${user.email}`);
         const token = await this.mailTokenManager.generateAndCacheTokens(user, 'confirm');
-        const url = `${$getFrontUrl($endpoints.email.confirmEmail)}?token=${token}`;
+        const url = `${$getFrontUrl($endpoints.email.VERIFY_ACCOUNT)}?token=${token}`;
         const email = user.email;
         const template = EmailTemplate.confirmEmail(url);
         await this.mailAbstract.send({ to: email, subject: 'Confirm mail', html: template });

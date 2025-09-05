@@ -21,6 +21,7 @@ export class MessagePrismaRepository extends MessageAbstract {
                     { senderId: secondUserId, receiverId: userId },
                 ],
             },
+
             cursor: cursor ? { id: cursor.id } : undefined,
             skip: cursor ? 1 : 0,
             take: limit,

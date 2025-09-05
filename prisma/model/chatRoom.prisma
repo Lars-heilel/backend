@@ -1,0 +1,6 @@
+model ChatRoom {
+    id String @id @unique @default(uuid())
+    createdAt DateTime @default(now())
+    messages  Message[]
+    chatRoomParticipant ChatRoomParticipant[]
+ }
