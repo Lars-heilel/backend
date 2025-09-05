@@ -13,10 +13,10 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { WsAuthStrategy } from './stratrgy/ws-auth.stategy';
 import { SafeUser } from '../users/Types/user.types';
-import { SendMessageSchema } from './DTO/sendMessage.dto';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Friendship } from '@prisma/generated/client';
+import { SaveMessageDto, SaveMessageSchema } from '../message/DTO/saveMessage.dto';
 @WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
@@ -64,25 +64,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             }
         }
     }
-    @SubscribeMessage(`send_message`)
-    async handleNewMessage(
-        @ConnectedSocket() socket: Socket,
-        @MessageBody(new ZodValidationPipe(SendMessageSchema))
-        data: { receiverId: string; content: string },
-    ) {
-        const sender = socket.data as SafeUser;
-        const savedMessage = await this.chatService.sendNewMessage(
-            sender.id,
-            data.receiverId,
-            data.content,
-        );
-        socket.emit(`new_message_sent`, savedMessage);
-        const receiverSockets = await this.chatService.getUserSockets(data.receiverId);
+    // @SubscribeMessage(`send_message`)
+    // async handleNewMessage(
+    //     @ConnectedSocket() socket: Socket,
+    //     @MessageBody(new ZodValidationPipe(SaveMessageSchema))
+    //     data: SaveMessageDto,
+    // ) {
+    //     const sender = socket.data as SafeUser;
+    //     const savedMessage = await this.chatService.sendNewMessage(sender.id);
+    //     socket.emit(`new_message_sent`, savedMessage);
+    //     const receiverSockets = await this.chatService.getUserSockets(data.receiverId);
 
-        for (const socketId of receiverSockets) {
-            this.server.to(socketId).emit('new_message', savedMessage);
-        }
-    }
+    //     for (const socketId of receiverSockets) {
+    //         this.server.to(socketId).emit('new_message', savedMessage);
+    //     }
+    // }
     @OnEvent('friendship.rejected')
     async handleFriendshipRejected(payload: Friendship) {
         this.logger.log(`Friendship rejected event for user ${payload.requesterId}`);

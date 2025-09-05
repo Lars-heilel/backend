@@ -25,7 +25,8 @@
         "prisma:generate": "prisma generate",
         "docker:prod": "docker compose up --build",
         "docker:down": "docker compose down",
-        "docker:up:dev": "docker compose -f docker-compose.dev.yml up"
+        "docker:up:dev": "docker compose -f docker-compose.dev.yml up",
+        "nest:newResource": "nest g resource"
     },
     "dependencies": {
         "@keyv/redis": "^4.4.0",

@@ -1,30 +1,28 @@
-import { Controller, Get, Query, UseGuards, UsePipes, HttpStatus } from '@nestjs/common';
-import { ChatService } from './chat.service';
+import { Controller, Get, Query, UseGuards, UsePipes, HttpStatus, Inject } from '@nestjs/common';
 import { Message } from '@prisma/generated/client';
-import { HistoriSchema, HistoryDto } from './DTO/history.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { HistoriSchema, HistoryDto } from './DTO/history.dto';
+import {
+    MESSAGE_SERVICE_INTERFACE,
+    MessageServiceInterface,
+} from './interface/messageServiceIntreface';
 
-@ApiTags('Chat')
-@Controller('chat')
-export class ChatController {
-    constructor(private readonly chatService: ChatService) {}
-
+@ApiTags('Message')
+@Controller('message')
+export class MessageController {
+    constructor(
+        @Inject(MESSAGE_SERVICE_INTERFACE) private readonly messageService: MessageServiceInterface,
+    ) {}
     @Get('history')
     @ApiOperation({ summary: 'Get chat history between two users' })
     @ApiBearerAuth('access-token')
     @ApiQuery({
-        name: 'userId',
+        name: 'chatRoomId',
         type: String,
-        description: 'ID of the user requesting the chat history',
-        example: 'user123',
-    })
-    @ApiQuery({
-        name: 'secondUserId',
-        type: String,
-        description: 'ID of the second user in the chat',
-        example: 'user456',
+        description: 'ID of the chat room to retrieve history from',
+        example: 'clx123abc456...',
     })
     @ApiQuery({
         name: 'limit',
@@ -59,6 +57,6 @@ export class ChatController {
     @UseGuards(AuthGuard('jwt'))
     @UsePipes(new ZodValidationPipe(HistoriSchema))
     async getChatHistory(@Query() dto: HistoryDto): Promise<Message[]> {
-        return await this.chatService.getChatHistory(dto);
+        return await this.messageService.getHistory(dto);
     }
 }

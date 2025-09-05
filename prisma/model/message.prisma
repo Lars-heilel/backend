@@ -7,7 +7,7 @@ model Message {
     content    String
     sender  User @relation( fields: [senderId], references: [id],onDelete: Cascade)
     //chatRoom
-    chatRoomId String ?
-    chatRoom ChatRoom? @relation(fields: [chatRoomId],references: [id],onDelete: Cascade)
+    chatRoomId String 
+    chatRoom ChatRoom @relation(fields: [chatRoomId],references: [id],onDelete: Cascade)
 
 }
