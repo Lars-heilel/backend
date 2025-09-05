@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ChatRoom } from '@prisma/generated/client';
 import { CHAT_ROOM_REPO_INTERFACE, ChatRoomRepoInterface } from './interface/chatRoomRepoInterface';
 import { CreatePrivateRoomDto, GetUserRoomsDto, isUserInRoomDto } from './DTO';
@@ -15,6 +15,10 @@ export class ChatRoomService implements ChatRoomServiceInterface {
 
     async findOrCreatePrivateRoom(dto: CreatePrivateRoomDto): Promise<ChatRoom> {
         const { firstUserId, secondUserId } = dto;
+        if (firstUserId === secondUserId) {
+            this.logger.warn(`Cannot create a chat room with yourself.`);
+            throw new BadRequestException('Cannot create a chat room with yourself.');
+        }
         this.logger.debug(`Searching for a room between ${firstUserId} and ${secondUserId}`);
         const existingRoom = await this.chatRoomRepo.findPrivateRoomByUsers(
             firstUserId,

@@ -9,6 +9,7 @@ import { WS_SESSION_INRERFACE } from './interface/wsSessionRepoInterface';
 import { SESSION_SERVICE_INTERFACE } from './interface/sessionServiceInterface';
 import { SessionService } from './session.service';
 import { AppGateway } from './app.gateway';
+import { ChatRoomModule } from '../chat-room/chat-room.module';
 
 @Module({
     providers: [
@@ -17,6 +18,6 @@ import { AppGateway } from './app.gateway';
         { provide: WS_SESSION_INRERFACE, useClass: WsSessionRepository },
         { provide: SESSION_SERVICE_INTERFACE, useClass: SessionService },
     ],
-    imports: [UsersModule, NestjsJwtModule, PrismaModule, MessageModule],
+    imports: [UsersModule, NestjsJwtModule, PrismaModule, MessageModule, ChatRoomModule],
 })
 export class AppGatewayModule {}
