@@ -51,7 +51,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
             await this.sessionService.handleConnection(user.id, client.id);
             this.logger.log(`Authenticated: ${user.email} (${client.id})`);
 
-            const allUserRooms = await this.chatRoomService.getUserRooms({ userId: user.id });
+            const allUserRooms = await this.chatRoomService.getUserRooms(user.id);
             for (const room of allUserRooms) {
                 await client.join(room.id);
             }
@@ -100,10 +100,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const sender = client.data as SafeUser;
         this.logger.debug(`Received message from ${sender.email} to ${receiverId}`);
 
-        const room = await this.chatRoomService.findOrCreatePrivateRoom({
-            firstUserId: sender.id,
-            secondUserId: receiverId,
-        });
+        const room = await this.chatRoomService.findOrCreatePrivateRoom(sender.id, receiverId);
 
         const savedMessage = await this.messageService.saveMessage({
             userId: sender.id,

@@ -1,4 +1,4 @@
-export const WS_SESSION_INRERFACE = Symbol('WS_SESSION_INRERFACE');
+export const WS_SESSION_INTERFACE = Symbol('WS_SESSION_INTERFACE');
 export interface WsSessionInterface {
     addSession(userId: string, socketId: string): Promise<void>;
     removeSession(socketId: string): Promise<void>;

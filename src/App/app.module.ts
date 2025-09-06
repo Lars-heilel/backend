@@ -10,6 +10,8 @@ import { FriendshipModule } from 'src/modules/friendship/friendship.module';
 import { UsersModule } from 'src/modules/users/users.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppGatewayModule } from '@src/modules/app_gateway/app-gateway.module';
+import { MessageModule } from '@src/modules/message/message.module';
+import { ChatRoomModule } from '@src/modules/chat-room/chat-room.module';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -36,6 +38,8 @@ import { AppGatewayModule } from '@src/modules/app_gateway/app-gateway.module';
         AuthModule,
         FriendshipModule,
         AppGatewayModule,
+        MessageModule,
+        ChatRoomModule,
     ],
 })
 export class AppModule {}
