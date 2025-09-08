@@ -28,10 +28,10 @@ import {
 import { SendMessageGatewayDto } from './DTO/sendMessageGateway.schema';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { SafeUser } from '../users/Types/user.types';
-// --- ИМПОРТИРУЕМ НАШИ КОНСТАНТЫ ---
+
 import { SOCKET_EVENTS, FRIENDSHIP_EVENT, MESSAGE_EVENT } from './const/event-const';
 
-@WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/events' }) // Рекомендую сменить namespace
+@WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/rocket_socket' })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
     private readonly logger = new Logger(AppGateway.name);

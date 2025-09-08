@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards, UsePipes, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, UsePipes, HttpStatus, Inject, Req } from '@nestjs/common';
 import { Message } from '@prisma/generated/client';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -8,6 +8,7 @@ import {
     MESSAGE_SERVICE_INTERFACE,
     MessageServiceInterface,
 } from './interface/messageServiceIntreface';
+import { JwtUser } from '../auth/tokens/types/jwt-req';
 
 @ApiTags('Message')
 @Controller('message')
@@ -56,7 +57,10 @@ export class MessageController {
     @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized access.' })
     @UseGuards(AuthGuard('jwt'))
     @UsePipes(new ZodValidationPipe(HistoriSchema))
-    async getChatHistory(@Query() dto: HistoryDto): Promise<Message[]> {
+    async getChatHistory(
+        @Query() dto: HistoryDto,
+        @Req() req: { user: JwtUser },
+    ): Promise<Message[]> {
         return await this.messageService.getHistory(dto);
     }
 }

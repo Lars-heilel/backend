@@ -42,21 +42,6 @@ export class ChatRoomRepository implements ChatRoomRepoInterface {
                     some: { userId: userId },
                 },
             },
-            include: {
-                participants: {
-                    include: {
-                        user: {
-                            select: { id: true, name: true, email: true },
-                        },
-                    },
-                },
-                messages: {
-                    orderBy: {
-                        createAt: 'desc',
-                    },
-                    take: 1,
-                },
-            },
         });
     }
 
@@ -69,6 +54,6 @@ export class ChatRoomRepository implements ChatRoomRepoInterface {
                 },
             },
         });
-        return !!participant; // Возвращаем true, если запись найдена, иначе false
+        return !!participant;
     }
 }

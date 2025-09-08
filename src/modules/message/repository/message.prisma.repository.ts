@@ -12,6 +12,7 @@ export class MessagePrismaRepository implements MessageRepoInterface {
     async saveMessage({ userId, chatRoomId, content }: SaveMessageDto): Promise<Message> {
         return await this.prisma.message.create({
             data: { senderId: userId, chatRoomId, content },
+            include: { sender: { select: USER_SELECT_FIELDS } },
         });
     }
     async getHistory({ chatRoomId, cursor, limit }: HistoryDto): Promise<Message[]> {
