@@ -29,12 +29,10 @@ import { SendMessageGatewayDto } from './DTO/sendMessageGateway.schema';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { SafeUser } from '../users/Types/user.types';
 import { SOCKET_EVENTS, FRIENDSHIP_EVENT, MESSAGE_EVENT } from './const/event-const';
-import { ConfigService } from '@nestjs/config';
 import { Env } from '@src/core/config/envConfig';
-const configService = new ConfigService<Env>();
-const clientUrl = configService.get('CLIENT_URL', { infer: true });
+import { ConfigService } from '@nestjs/config';
+
 @WebSocketGateway({
-    cors: { origin: ['http://localhost:5173', clientUrl], credentials: true },
     namespace: '/rocket_socket',
 })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -46,8 +44,16 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @Inject(CHAT_ROOM_SERVICE_INTERFACE)
         private readonly chatRoomService: ChatRoomServiceInterface,
         private authStrategy: WsAuthStrategy,
+        private env: ConfigService<Env>,
     ) {}
-
+    onModuleInit() {
+        const clientUrl = this.env.getOrThrow('CLIENT_URL', { infer: true });
+        this.logger.log(`Configuring WebSocket CORS for origin: ${clientUrl}`);
+        this.server.engine.opts.cors = {
+            origin: ['http://localhost:5173', clientUrl],
+            credentials: true,
+        };
+    }
     async handleConnection(client: Socket) {
         this.logger.debug(`New connection attempt: ${client.id}`);
         try {
