@@ -26,8 +26,7 @@ export const envSchema = z.object({
     POSTGRES_PASSWORD: z.string(),
     POSTGRES_DB: z.string(),
     //Redis
-    REDIS_HOST: z.string(),
-    REDIS_PORT: z.coerce.number(),
+    REDIS_URL: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

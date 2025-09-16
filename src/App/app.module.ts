@@ -19,14 +19,14 @@ import { ChatRoomModule } from '@src/modules/chat-room/chat-room.module';
             imports: [ConfigModule],
             useFactory: (env: ConfigService<Env>) => ({
                 type: 'single',
-                url: `redis://${env.get('REDIS_HOST')}:${env.get('REDIS_PORT')}`,
+                url: `${env.get('REDIS_URL')}`,
             }),
             inject: [ConfigService],
         }),
         CacheModule.registerAsync({
             imports: [ConfigModule],
             useFactory: (env: ConfigService<Env>) => ({
-                stores: [createKeyv(`redis://${env.get('REDIS_HOST')}:${env.get('REDIS_PORT')}`)],
+                stores: [createKeyv(`${env.get('REDIS_URL')}`)],
                 ttl: 24 * 60 * 60 * 1000,
             }),
             isGlobal: true,
