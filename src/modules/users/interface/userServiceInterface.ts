@@ -13,4 +13,5 @@ export interface UserServiceInterface {
     isConfirmed(email: string): Promise<boolean>;
     updatePassword(email: string, newPassword: string): Promise<{ success: string }>;
     validateUser(email: string, password: string): Promise<SafeUser | null>;
+    getProfile(userId: string): Promise<SafeUser | null>;
 }

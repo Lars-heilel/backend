@@ -6,24 +6,27 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from '@prisma/prisma.module';
 import { Env, validate } from 'src/core/config/envConfig';
 import { AuthModule } from 'src/modules/auth/auth.module';
-import { ChatModule } from 'src/modules/chat/chat.module';
 import { FriendshipModule } from 'src/modules/friendship/friendship.module';
 import { UsersModule } from 'src/modules/users/users.module';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AppGatewayModule } from '@src/modules/app_gateway/app-gateway.module';
+import { MessageModule } from '@src/modules/message/message.module';
+import { ChatRoomModule } from '@src/modules/chat-room/chat-room.module';
 @Module({
     imports: [
+        EventEmitterModule.forRoot(),
         RedisModule.forRootAsync({
             imports: [ConfigModule],
             useFactory: (env: ConfigService<Env>) => ({
                 type: 'single',
-                url: `redis://${env.get('REDIS_HOST')}:${env.get('REDIS_PORT')}`,
+                url: `${env.get('REDIS_URL')}`,
             }),
             inject: [ConfigService],
         }),
         CacheModule.registerAsync({
             imports: [ConfigModule],
             useFactory: (env: ConfigService<Env>) => ({
-                stores: [createKeyv(`redis://${env.get('REDIS_HOST')}:${env.get('REDIS_PORT')}`)],
+                stores: [createKeyv(`${env.get('REDIS_URL')}`)],
                 ttl: 24 * 60 * 60 * 1000,
             }),
             isGlobal: true,
@@ -34,7 +37,9 @@ import { UsersModule } from 'src/modules/users/users.module';
         UsersModule,
         AuthModule,
         FriendshipModule,
-        ChatModule,
+        AppGatewayModule,
+        MessageModule,
+        ChatRoomModule,
     ],
 })
 export class AppModule {}

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
 import { FriendshipRepositoryAbstract } from './friendship.repository.abstract';
 import { Friendship, FriendshipStatus } from '@prisma/generated/client';
+import { USER_SELECT_FIELDS } from '@src/modules/users/const/user.prisma.constants';
 
 @Injectable()
 export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
@@ -12,6 +13,12 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
     async createRequest(requesterId: string, addresseeId: string): Promise<Friendship> {
         return this.prisma.friendship.create({
             data: { requesterId, addresseeId, status: 'PENDING' },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
 
@@ -23,14 +30,23 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
                     { requesterId: user2, addresseeId: user1 },
                 ],
             },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
     async getFriendList(userId: string): Promise<Friendship[]> {
         return this.prisma.friendship.findMany({
             where: { status: 'ACCEPTED', OR: [{ requesterId: userId }, { addresseeId: userId }] },
-            skip: 0,
-            take: 20,
-            include: { requester: { select: { name: true, id: true } } },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
     async findActiveFriendship(
@@ -57,6 +73,12 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
         return this.prisma.friendship.update({
             where: { id },
             data: { status },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
 
@@ -67,6 +89,12 @@ export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
     async getIncomingRequests(userId: string): Promise<Friendship[]> {
         return this.prisma.friendship.findMany({
             where: { addresseeId: userId, status: 'PENDING' },
+            include: {
+                addressee: {
+                    select: USER_SELECT_FIELDS,
+                },
+                requester: { select: USER_SELECT_FIELDS },
+            },
         });
     }
 }

@@ -7,12 +7,16 @@ import {
 } from '@nestjs/common';
 import { FriendshipRepositoryAbstract } from './repo/friendship.repository.abstract';
 import { Friendship } from '@prisma/generated/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class FriendshipService {
     private readonly logger = new Logger(FriendshipService.name);
 
-    constructor(private readonly repository: FriendshipRepositoryAbstract) {}
+    constructor(
+        private readonly repository: FriendshipRepositoryAbstract,
+        private readonly eventEmitter: EventEmitter2,
+    ) {}
 
     async sendRequest(requesterId: string, addresseeId: string): Promise<Friendship> {
         this.logger.debug(`Sending friend request from ${requesterId} to ${addresseeId}`);
@@ -42,6 +46,7 @@ export class FriendshipService {
         this.logger.verbose(`Creating new friend request`);
         const request = await this.repository.createRequest(requesterId, addresseeId);
 
+        this.eventEmitter.emit('friendship.requested', request);
         this.logger.log(
             `Friend request created (ID: ${request.id}) from ${requesterId} to ${addresseeId}`,
         );
@@ -84,14 +89,14 @@ export class FriendshipService {
         if (type === 'REJECTED') {
             this.logger.verbose(`Rejecting request ${friendshipId}`);
             await this.repository.delete(friendshipId);
-
+            this.eventEmitter.emit('friendship.rejected', request);
             this.logger.log(`Request rejected: ${friendshipId}`);
             return { message: 'Request rejected' };
         }
 
         this.logger.verbose(`Accepting request ${friendshipId}`);
         const result = await this.repository.updateStatus(friendshipId, type);
-
+        this.eventEmitter.emit('friendship.accepted', result);
         this.logger.log(
             `Friendship accepted: ${friendshipId} between ${request.requesterId} and ${request.addresseeId}`,
         );
@@ -113,7 +118,14 @@ export class FriendshipService {
             );
             throw new ForbiddenException('You are not a participant of this friendship');
         }
+        const notifiedUserId =
+            friendship.requesterId === userId ? friendship.addresseeId : friendship.requesterId;
         await this.repository.delete(friendshipId);
+        this.eventEmitter.emit('friendship.deleted', {
+            deletedBy: userId,
+            notifiedUser: notifiedUserId,
+            friendshipId: friendship.id,
+        });
         this.logger.log(`Friendship deleted: ${friendshipId}`);
     }
     async validateByAcceptedStatus(

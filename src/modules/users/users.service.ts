@@ -5,7 +5,6 @@ import {
     Injectable,
     Logger,
     NotFoundException,
-    UnauthorizedException,
 } from '@nestjs/common';
 
 import { User } from '@prisma/generated/client';
@@ -187,5 +186,8 @@ export class UsersService implements UserServiceInterface {
         this.logger.verbose(`User validated successfully: ${email}`);
         const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
+    }
+    async getProfile(userId: string) {
+        return await this.userRepo.getProfile(userId);
     }
 }

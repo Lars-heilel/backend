@@ -6,15 +6,17 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from '@common/fliter/allExeptionFilter';
 import * as process from 'node:process';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap(): Promise<void> {
+    const logger = new Logger('bootstrap');
+
     const isProd = process.env.NODE_ENV === 'production';
     const app = await NestFactory.create(AppModule, {
         logger: isProd ? ['warn', 'error', 'log'] : ['error', 'log', 'warn', 'verbose', 'debug'],
     });
 
     const env = app.get(ConfigService<Env>);
-
     //Cookies
     app.use(cookieParser());
 
@@ -59,5 +61,6 @@ async function bootstrap(): Promise<void> {
     //Global filters
     app.useGlobalFilters(new AllExceptionsFilter(app.get(HttpAdapterHost)));
     await app.listen(env.get('PORT') ?? 3001);
+    logger.log(`Swagger:http://localhost:${env.get('PORT', { infer: true })}/api`);
 }
 void bootstrap();

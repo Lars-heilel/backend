@@ -10,7 +10,6 @@ import {
     Res,
     UseGuards,
     UsePipes,
-    UnauthorizedException,
     HttpStatus,
     ForbiddenException,
 } from '@nestjs/common';

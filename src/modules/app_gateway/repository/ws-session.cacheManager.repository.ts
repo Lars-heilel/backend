@@ -1,18 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { WsSessionAbstract } from '../interface/ws-sessoin.abstract';
 import { WsException } from '@nestjs/websockets';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
+import { WsSessionInterface } from '../interface/wsSessionRepoInterface';
 
 @Injectable()
-export class WsSessionRepository extends WsSessionAbstract {
+export class WsSessionRepository implements WsSessionInterface {
     private readonly USER_SESSIONS_KEY = 'ws:user_sessions';
     private readonly SOCKET_USER_MAP_KEY = 'ws:socket_user_map';
     private readonly logger = new Logger(WsSessionRepository.name);
 
-    constructor(@InjectRedis() private readonly redis: Redis) {
-        super();
-    }
+    constructor(@InjectRedis() private readonly redis: Redis) {}
 
     async addSession(userId: string, socketId: string): Promise<void> {
         this.logger.debug(`Saving session: user=${userId}, socket=${socketId}`);

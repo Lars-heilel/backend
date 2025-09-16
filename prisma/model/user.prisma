@@ -5,13 +5,14 @@ model User {
   name        String   @unique
   isConfirmed Boolean  @default(false)
   createdAt   DateTime @default(now())
-
+  // TokenModel
   tokens Token[]
-
+ //FriendshipModel
   sendRequest      Friendship[] @relation("FriendRequests")
   receivedRequests Friendship[] @relation("FriendReceivers")
-
-  sentMessage      Message[] @relation("SentMessage")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  //ChatRoomParticpant
+  chatRoomParticipants ChatRoomParticipant[] 
+  //MessageModel
+  sentMessage      Message[]
   lastSeen         DateTime?
 }

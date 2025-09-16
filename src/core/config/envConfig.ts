@@ -22,12 +22,11 @@ export const envSchema = z.object({
     EMAIL_TOKEN_EXPIRES: z.string(),
     PASSWORD_RESET_EXPIRES: z.string(),
     //POSTGRESQL
-    POSTGRES_USER: z.string(),
-    POSTGRES_PASSWORD: z.string(),
-    POSTGRES_DB: z.string(),
+    POSTGRES_USER: z.string().optional(),
+    POSTGRES_PASSWORD: z.string().optional(),
+    POSTGRES_DB: z.string().optional(),
     //Redis
-    REDIS_HOST: z.string(),
-    REDIS_PORT: z.coerce.number(),
+    REDIS_URL: z.string(),
 });
 
 export type Env = z.infer<typeof envSchema>;

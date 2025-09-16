@@ -3,8 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 
 export const HistoriSchema = z.object({
-    userId: z.string().min(1, 'User ID is required'),
-    secondUserId: z.string().min(1, 'Second user ID is required'),
+    chatRoomId: z.string().min(1, 'Second user ID is required'),
     limit: z.coerce.number().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100'),
     cursor: z
         .object({
@@ -15,16 +14,10 @@ export const HistoriSchema = z.object({
 });
 export class HistoryDto extends createZodDto(HistoriSchema) {
     @ApiProperty({
-        description: 'ID of the user requesting the chat history',
-        example: 'user123',
-    })
-    userId: string;
-
-    @ApiProperty({
         description: 'ID of the second user in the chat',
         example: 'user456',
     })
-    secondUserId: string;
+    chatRoomId: string;
 
     @ApiProperty({
         description: 'Number of messages to retrieve',

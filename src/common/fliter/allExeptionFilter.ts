@@ -56,7 +56,9 @@ export class AllExceptionsFilter {
             if (process.env.NODE_ENV !== 'production') {
                 zodErrors = exception.getZodError().errors.map((e: ZodIssue) => e.message);
             }
-            this.logger.warn('Validation exception:', zodErrors);
+            this.logger.warn(
+                `Validation exception: ${JSON.stringify(exception.getZodError().issues, null, 2)}`,
+            );
         } else if (exception instanceof HttpException) {
             statusCode = exception.getStatus();
             message = exception.message;

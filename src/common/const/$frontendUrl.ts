@@ -1,7 +1,7 @@
 export const $endpoints = {
     email: {
         resetPassword: '/reset-password',
-        confirmEmail: '/confirm-email',
+        VERIFY_ACCOUNT: '/verify-account',
     },
 } as const;
 export function $getFrontUrl(endpoints: string) {
