@@ -19,7 +19,17 @@ jobs:
               with:
                   node-version: 'latest'
 
+            - name: Cache dependencies
+              id: cache
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node-
+
             - name: Install Dependencies
+              if: steps.cache.outputs.cache-hit != 'true'
               run: npm install
 
             - name: Run Linter
@@ -36,9 +46,18 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: 'latest'
+            - name: Cache dependencies
+              id: cache
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node-
 
             - name: Install Dependencies
+              if: steps.cache.outputs.cache-hit != 'true'
               run: npm install
 
             - name: Run Tests
-              run: npm test
+              run: npm run test
