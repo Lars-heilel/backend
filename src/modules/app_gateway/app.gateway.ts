@@ -28,10 +28,15 @@ import {
 import { SendMessageGatewayDto } from './DTO/sendMessageGateway.schema';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { SafeUser } from '../users/Types/user.types';
-
 import { SOCKET_EVENTS, FRIENDSHIP_EVENT, MESSAGE_EVENT } from './const/event-const';
-
-@WebSocketGateway({ cors: { origin: '*', credentials: true }, namespace: '/rocket_socket' })
+import { ConfigService } from '@nestjs/config';
+import { Env } from '@src/core/config/envConfig';
+const configService = new ConfigService<Env>();
+const clientUrl = configService.get('CLIENT_URL', { infer: true });
+@WebSocketGateway({
+    cors: { origin: ['http://localhost:5173', clientUrl], credentials: true },
+    namespace: '/rocket_socket',
+})
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
     private readonly logger = new Logger(AppGateway.name);
