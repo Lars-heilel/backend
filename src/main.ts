@@ -57,7 +57,6 @@ async function bootstrap(): Promise<void> {
             },
         });
     }
-
     //Global filters
     app.useGlobalFilters(new AllExceptionsFilter(app.get(HttpAdapterHost)));
     await app.listen(env.get('PORT') ?? 3001);
