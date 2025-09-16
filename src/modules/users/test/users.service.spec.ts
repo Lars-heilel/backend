@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users.service';
 import { ENCRYPTION_SERVICE, USER_REPOSITORY } from '@src/core/constants/di-token';
-import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { mockEncryption, mockUserRepo } from './mock/service.mock';
 import {
     mockCreateUserDto,
@@ -11,6 +11,7 @@ import {
     mockUpdatePassword,
 } from './mock/dto.mock';
 import { mockConfirmedUser, mockFullUser, mockSafeUser, mockSafeUserList } from './mock/user.mock';
+
 describe('UsersService', () => {
     let service: UsersService;
 
@@ -262,28 +263,33 @@ describe('UsersService', () => {
                     'Pass$word123',
                     mockConfirmedUser.password,
                 );
-                expect(result).toEqual({ ...mockConfirmedUser, password: undefined });
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { password, ...safeUser } = mockConfirmedUser;
+                expect(result).toEqual(safeUser);
             });
-            it('should throw UnauthorizedException if the account is not confirmed', async () => {
+
+            it('should throw ForbiddenException if the account is not confirmed', async () => {
                 mockUserRepo.findUserByEmail.mockResolvedValue(mockFullUser);
                 await expect(
                     service.validateUser(mockFullUser.email, 'Pass$word123'),
-                ).rejects.toThrow(UnauthorizedException);
+                ).rejects.toThrow(ForbiddenException);
                 await expect(
                     service.validateUser(mockFullUser.email, 'Pass$word123'),
                 ).rejects.toThrow('Account not confirmed');
                 expect(mockEncryption.compare).not.toHaveBeenCalled();
             });
-            it('should throw UnauthorizedException if the password is invalid', async () => {
+
+            it('should throw ForbiddenException if the password is invalid', async () => {
                 mockUserRepo.findUserByEmail.mockResolvedValue(mockConfirmedUser);
                 mockEncryption.compare.mockResolvedValue(false);
                 await expect(
                     service.validateUser(mockConfirmedUser.email, 'wrong-password'),
-                ).rejects.toThrow(UnauthorizedException);
+                ).rejects.toThrow(ForbiddenException);
                 await expect(
                     service.validateUser(mockConfirmedUser.email, 'wrong-password'),
                 ).rejects.toThrow('Invalid credentials');
             });
+
             it('should throw NotFoundException if user is not found', async () => {
                 mockUserRepo.findUserByEmail.mockResolvedValue(null);
                 await expect(
