@@ -29,7 +29,7 @@ import { SendMessageGatewayDto } from './DTO/sendMessageGateway.schema';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { SafeUser } from '../users/Types/user.types';
 import { SOCKET_EVENTS, FRIENDSHIP_EVENT, MESSAGE_EVENT, ROOM_EVENT } from './const/event-const';
-import { JoinRoomSchema } from './DTO/join.schema';
+import { JoinRoomDto, JoinRoomSchema } from './DTO/join.schema';
 
 @WebSocketGateway({
     cors: {
@@ -97,17 +97,17 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     @SubscribeMessage(ROOM_EVENT.JOIN_ROOM)
     async handleJoinRoom(
-        @MessageBody(new ZodValidationPipe(JoinRoomSchema)) roomId: string,
+        @MessageBody(new ZodValidationPipe(JoinRoomSchema)) dto: JoinRoomDto,
         @ConnectedSocket() client: Socket,
     ) {
         const userId = (client.data as SafeUser).id;
-        const isAllowed = await this.chatRoomService.isUserInRoom(userId, roomId);
+        const isAllowed = await this.chatRoomService.isUserInRoom(userId, dto.roomId);
         if (isAllowed) {
-            await client.join(roomId);
-            this.logger.log(`User ${userId} manually joined room ${roomId}`);
-            return { status: 'success', message: `Successfully joined room ${roomId}` };
+            await client.join(dto.roomId);
+            this.logger.log(`User ${userId} manually joined room ${dto.roomId}`);
+            return { status: 'success', message: `Successfully joined room ${dto.roomId}` };
         } else {
-            this.logger.warn(`User ${userId} tried to join room ${roomId} without permission.`);
+            this.logger.warn(`User ${userId} tried to join room ${dto.roomId} without permission.`);
             return { status: 'error', message: 'Not allowed to join this room' };
         }
     }
