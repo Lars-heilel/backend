@@ -52,11 +52,13 @@ export class TokensService {
 
     setRefreshTokenCookie(res: Response, token: string) {
         this.logger.debug(`Setting refresh token cookie`);
+
+        const isProd = process.env.NODE_ENV === 'production';
         res.cookie('refreshToken', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none',
-            partitioned: true,
+            secure: isProd ? true : false,
+            sameSite: isProd ? 'none' : 'lax',
+            partitioned: isProd ? true : false,
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
     }

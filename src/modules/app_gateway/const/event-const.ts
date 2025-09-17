@@ -11,6 +11,10 @@ const FRIENDSHIP_EVENT = {
     FRIENDSHIP_REQUEST_REJECTED: 'friendship_request_rejected',
     FRIENDSHIP_DELETED: 'friendship_deleted',
 } as const;
+
+export const ROOM_EVENT = {
+    JOIN_ROOM: 'join_room',
+} as const;
 const MESSAGE_EVENT = {
     SEND_MESSAGE: 'send_message',
     NEW_MESSAGE: 'new_message',
