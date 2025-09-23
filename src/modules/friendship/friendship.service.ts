@@ -1,20 +1,23 @@
 import {
     ConflictException,
     ForbiddenException,
+    Inject,
     Injectable,
     Logger,
     NotFoundException,
 } from '@nestjs/common';
-import { FriendshipRepositoryAbstract } from './repo/friendship.repository.abstract';
 import { Friendship } from '@prisma/generated/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { FRIENDSHIP_REPOSITORY, IFriendshipRepository } from './interface/repo.interface';
+import { IFriendshipService } from './interface/service.interface';
 
 @Injectable()
-export class FriendshipService {
+export class FriendshipService implements IFriendshipService {
     private readonly logger = new Logger(FriendshipService.name);
 
     constructor(
-        private readonly repository: FriendshipRepositoryAbstract,
+        @Inject(FRIENDSHIP_REPOSITORY)
+        private readonly repository: IFriendshipRepository,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 

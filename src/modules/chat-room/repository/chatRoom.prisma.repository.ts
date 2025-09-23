@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ChatRoomRepoInterface } from '../interface/chatRoomRepoInterface';
 import { ChatRoom } from '@prisma/generated/client';
 import { PrismaService } from '@prisma/prisma.service';
+import { USER_SELECT_FIELDS } from '@src/modules/users/const/user.prisma.constants';
+import { ChatRoomWithDetails } from '../types/prisma.types';
 
 @Injectable()
 export class ChatRoomRepository implements ChatRoomRepoInterface {
@@ -35,11 +37,51 @@ export class ChatRoomRepository implements ChatRoomRepoInterface {
         });
     }
 
-    async getUserRooms(userId: string): Promise<ChatRoom[]> {
+    async getUserRooms(userId: string): Promise<ChatRoomWithDetails[]> {
         return this.prisma.chatRoom.findMany({
             where: {
-                participants: {
-                    some: { userId: userId },
+                AND: [
+                    {
+                        participants: {
+                            some: {
+                                userId: userId,
+                            },
+                        },
+                    },
+                    {
+                        participants: {
+                            some: {
+                                userId: { not: userId },
+                                user: {
+                                    OR: [
+                                        {
+                                            sendRequest: {
+                                                some: {
+                                                    addresseeId: userId,
+                                                    status: 'ACCEPTED',
+                                                },
+                                            },
+                                        },
+                                        {
+                                            receivedRequests: {
+                                                some: {
+                                                    requesterId: userId,
+                                                    status: 'ACCEPTED',
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            include: {
+                participants: { include: { user: { select: USER_SELECT_FIELDS } } },
+                messages: { orderBy: { createAt: 'desc' }, take: 1 },
+                _count: {
+                    select: { messages: { where: { read: false, senderId: { not: userId } } } },
                 },
             },
         });

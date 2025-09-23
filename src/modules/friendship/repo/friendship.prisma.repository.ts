@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@prisma/prisma.service';
-import { FriendshipRepositoryAbstract } from './friendship.repository.abstract';
 import { Friendship, FriendshipStatus } from '@prisma/generated/client';
 import { USER_SELECT_FIELDS } from '@src/modules/users/const/user.prisma.constants';
+import { IFriendshipRepository } from '../interface/repo.interface';
 
 @Injectable()
-export class FriendshipPrismaRepository extends FriendshipRepositoryAbstract {
-    constructor(private readonly prisma: PrismaService) {
-        super();
-    }
+export class FriendshipPrismaRepository implements IFriendshipRepository {
+    constructor(private readonly prisma: PrismaService) {}
 
     async createRequest(requesterId: string, addresseeId: string): Promise<Friendship> {
         return this.prisma.friendship.create({

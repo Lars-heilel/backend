@@ -5,7 +5,7 @@ import { Env } from 'src/core/config/envConfig';
 import { Response } from 'express';
 import { JwtPayload } from './types/jwt-payload';
 import { UserServiceInterface } from '@src/modules/users/interface/userServiceInterface';
-import { ENCRYPTION_SERVICE, JWT_SERVICE, USER_SERVICE } from '@src/core/constants/di-token';
+import { ENCRYPTION_SERVICE, JWT_SERVICE, USER_SERVICE } from '@src/core/config/di-token';
 import { EncryptionInterface } from '@src/core/security/encryption/interface/encryprion.interface';
 import { JwtServiceInterface } from '@src/core/security/jwt/interface/jwt.interface';
 

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users.service';
-import { ENCRYPTION_SERVICE, USER_REPOSITORY } from '@src/core/constants/di-token';
+import { ENCRYPTION_SERVICE, USER_REPOSITORY } from '@src/core/config/di-token';
 import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { mockEncryption, mockUserRepo } from './mock/service.mock';
 import {

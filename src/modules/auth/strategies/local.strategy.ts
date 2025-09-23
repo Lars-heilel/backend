@@ -2,7 +2,7 @@ import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
 
-import { USER_SERVICE } from '@src/core/constants/di-token';
+import { USER_SERVICE } from '@src/core/config/di-token';
 import { UserServiceInterface } from '@src/modules/users/interface/userServiceInterface';
 
 @Injectable()

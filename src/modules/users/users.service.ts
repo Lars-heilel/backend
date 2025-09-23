@@ -12,7 +12,7 @@ import { FindUserDTO } from './DTO/findUsers.dto';
 import { CreateUserDto } from './DTO/createUser.dto';
 import { SafeUser } from './Types/user.types';
 import { UserServiceInterface } from './interface/userServiceInterface';
-import { ENCRYPTION_SERVICE, USER_REPOSITORY } from '@src/core/constants/di-token';
+import { ENCRYPTION_SERVICE, USER_REPOSITORY } from '@src/core/config/di-token';
 import { EncryptionInterface } from '@src/core/security/encryption/interface/encryprion.interface';
 import { UserRepositoryInterface } from './interface/userRepoInterface';
 

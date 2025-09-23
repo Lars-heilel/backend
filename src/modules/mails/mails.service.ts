@@ -14,7 +14,7 @@ import { SafeUser } from '../users/Types/user.types';
 import { TokensService } from '../auth/tokens/tokens.service';
 import { Response } from 'express';
 import { JwtPayload } from '../auth/tokens/types/jwt-payload';
-import { USER_SERVICE } from '@src/core/constants/di-token';
+import { USER_SERVICE } from '@src/core/config/di-token';
 import { UserServiceInterface } from '../users/interface/userServiceInterface';
 
 @Injectable()

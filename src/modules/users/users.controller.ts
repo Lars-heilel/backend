@@ -4,7 +4,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiCookieAuth } from '@nestjs/swagger';
 import { JwtUser } from '../auth/tokens/types/jwt-req';
-import { USER_SERVICE } from '@src/core/constants/di-token';
+import { USER_SERVICE } from '@src/core/config/di-token';
 import { UserServiceInterface } from './interface/userServiceInterface';
 
 @ApiTags('Users')

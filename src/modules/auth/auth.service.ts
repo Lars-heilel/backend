@@ -6,7 +6,7 @@ import { SafeUser } from '../users/Types/user.types';
 import { JwtPayload } from './tokens/types/jwt-payload';
 import { CreateUserDto } from '../users/DTO/createUser.dto';
 import { UserServiceInterface } from '../users/interface/userServiceInterface';
-import { USER_SERVICE } from '@src/core/constants/di-token';
+import { USER_SERVICE } from '@src/core/config/di-token';
 
 @Injectable()
 export class AuthService {

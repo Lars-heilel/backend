@@ -3,6 +3,7 @@ import {
     Controller,
     Delete,
     Get,
+    Inject,
     Logger,
     Param,
     Patch,
@@ -19,17 +20,19 @@ import {
     ApiBody,
     ApiSecurity,
 } from '@nestjs/swagger';
-import { FriendshipService } from './friendship.service';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { UpdateFriendshipStatusDto, UpdateFriendshipStatusSchema } from './DTO/update-status.dto';
 import { SendFriendRequestDto, SendFriendRequestSchema } from './DTO/send-request.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtUser } from '../auth/tokens/types/jwt-req';
+import { FRIENDSHIP_SERVICE, IFriendshipService } from './interface/service.interface';
 
 @ApiTags('Friendship')
 @Controller('friendship')
 export class FriendshipController {
-    constructor(private readonly friendshipService: FriendshipService) {}
+    constructor(
+        @Inject(FRIENDSHIP_SERVICE) private readonly friendshipService: IFriendshipService,
+    ) {}
 
     @Post()
     @UseGuards(AuthGuard('jwt'))

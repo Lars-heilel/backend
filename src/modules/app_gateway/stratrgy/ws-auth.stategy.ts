@@ -7,7 +7,7 @@ import { JwtPayload } from 'src/modules/auth/tokens/types/jwt-payload';
 import { SafeUser } from 'src/modules/users/Types/user.types';
 import { JwtTokenAuthSchema } from '../DTO/token.dto';
 import { UserServiceInterface } from '@src/modules/users/interface/userServiceInterface';
-import { JWT_SERVICE, USER_SERVICE } from '@src/core/constants/di-token';
+import { JWT_SERVICE, USER_SERVICE } from '@src/core/config/di-token';
 import { JwtServiceInterface } from '@src/core/security/jwt/interface/jwt.interface';
 
 @Injectable()

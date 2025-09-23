@@ -1,23 +1,15 @@
-import {
-    Controller,
-    Get,
-    HttpStatus,
-    Inject,
-    Query,
-    Req,
-    UseGuards,
-    UsePipes,
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Inject, Query, UseGuards, UsePipes } from '@nestjs/common';
 import {
     CHAT_ROOM_SERVICE_INTERFACE,
     ChatRoomServiceInterface,
 } from './interface/chatRoomServiceIntreface';
 import { AuthGuard } from '@nestjs/passport';
-import { JwtUser } from '../auth/tokens/types/jwt-req';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CreatePrivateRoomDto, CreatePrivateRoomSchema } from './DTO';
 import { ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { ChatRoomResponseDto } from './DTO/private-room-return.dto';
+import { CurrentUser } from '@src/common/decorators/CurrentUser.decorator';
+import { AllChatRoomReturnDto } from './DTO/all-chatroom-return.dto';
 
 @Controller('chat-room')
 export class ChatRoomController {
@@ -56,12 +48,30 @@ export class ChatRoomController {
     @ApiSecurity('access-token')
     @UsePipes(new ZodValidationPipe(CreatePrivateRoomSchema))
     async findOrCreatePrivateChatRoom(
-        @Req() currentUser: { user: JwtUser },
+        @CurrentUser() currentUserId: string,
         @Query() dto: CreatePrivateRoomDto,
     ) {
-        return await this.chatRoomService.findOrCreatePrivateRoom(
-            currentUser.user.sub,
-            dto.friendId,
-        );
+        return await this.chatRoomService.findOrCreatePrivateRoom(currentUserId, dto.friendId);
+    }
+
+    @Get('list')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOperation({
+        summary: 'Get all chat rooms for the current user',
+        description:
+            'Retrieves a list of all chat rooms the authenticated user is a participant of, formatted for client-side display.',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Successfully retrieved the list of chat rooms.',
+        type: [AllChatRoomReturnDto],
+    })
+    @ApiResponse({
+        status: HttpStatus.UNAUTHORIZED,
+        description: 'Unauthorized. The user is not authenticated.',
+    })
+    @ApiSecurity('access-token')
+    async getMyChatRoomList(@CurrentUser() currentUserId: string): Promise<AllChatRoomReturnDto[]> {
+        return await this.chatRoomService.getUserRooms(currentUserId);
     }
 }

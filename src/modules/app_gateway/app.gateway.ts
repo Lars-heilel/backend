@@ -30,6 +30,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { SafeUser } from '../users/Types/user.types';
 import { SOCKET_EVENTS, FRIENDSHIP_EVENT, MESSAGE_EVENT, ROOM_EVENT } from './const/event-const';
 import { JoinRoomDto, JoinRoomSchema } from './DTO/join.schema';
+import { FRIENDSHIP_SERVICE, IFriendshipService } from '../friendship/interface/service.interface';
 
 @WebSocketGateway({
     cors: {
@@ -47,6 +48,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @Inject(CHAT_ROOM_SERVICE_INTERFACE)
         private readonly chatRoomService: ChatRoomServiceInterface,
         private authStrategy: WsAuthStrategy,
+        @Inject(FRIENDSHIP_SERVICE) private readonly friendshipService: IFriendshipService,
     ) {}
     async handleConnection(client: Socket) {
         this.logger.debug(`New connection attempt: ${client.id}`);
@@ -119,7 +121,14 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const { receiverId, content } = dto;
         const sender = client.data as SafeUser;
         this.logger.debug(`Received message from ${sender.email} to ${receiverId}`);
-
+        const areFriends = await this.friendshipService.validateByAcceptedStatus(
+            sender.id,
+            receiverId,
+        );
+        if (areFriends.status !== 'ACCEPTED') {
+            this.logger.warn(`you are not friends, sending messages is prohibited`);
+            throw new WsException('you are not friends, sending messages is prohibited');
+        }
         const room = await this.chatRoomService.findOrCreatePrivateRoom(sender.id, receiverId);
 
         const savedMessage = await this.messageService.saveMessage({
@@ -169,8 +178,24 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     @OnEvent('friendship.accepted')
     async handleFriendshipAccepted(payload: Friendship) {
-        this.logger.log(`Friendship accepted event for user ${payload.requesterId}`);
-        const requesterSockets = await this.sessionService.getUserSockets(payload.requesterId);
+        const { addresseeId, requesterId } = payload;
+        this.logger.log(`Friendship accepted event for users ${requesterId} and ${addresseeId}`);
+        this.logger.log(`Creating or finding a room for ${requesterId} and ${addresseeId}`);
+        const room = await this.chatRoomService.findOrCreatePrivateRoom(requesterId, addresseeId);
+        this.logger.log(`Room ${room.id} is ready for the new friends.`);
+        const participants = [addresseeId, requesterId];
+        for (const userId of participants) {
+            const userSocket = await this.sessionService.getUserSockets(userId);
+            for (const socketId of userSocket) {
+                const socketInstance = this.server.sockets.sockets.get(socketId);
+
+                if (socketInstance) {
+                    await socketInstance.join(room.id);
+                    this.logger.log(`Socket ${socketId} for user ${userId} joined room ${room.id}`);
+                }
+            }
+        }
+        const requesterSockets = await this.sessionService.getUserSockets(requesterId);
         for (const socketId of requesterSockets) {
             this.server.to(socketId).emit(FRIENDSHIP_EVENT.FRIENDSHIP_REQUEST_ACCEPTED, payload);
         }

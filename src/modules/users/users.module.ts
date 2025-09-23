@@ -4,7 +4,7 @@ import { UsersController } from './users.controller';
 import { PrismaModule } from '@prisma/prisma.module';
 import { UserPrismaRepository } from './repositories/user.prisma.repository';
 import { BcryptModule } from 'src/core/security/encryption/bcrypt/bcrypt.module';
-import { USER_REPOSITORY, USER_SERVICE } from '@src/core/constants/di-token';
+import { USER_REPOSITORY, USER_SERVICE } from '@src/core/config/di-token';
 
 @Module({
     controllers: [UsersController],
