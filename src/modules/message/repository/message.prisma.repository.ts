@@ -15,10 +15,25 @@ export class MessagePrismaRepository implements MessageRepoInterface {
             include: { sender: { select: USER_SELECT_FIELDS } },
         });
     }
-    async getHistory({ chatRoomId, cursor, limit }: HistoryDto): Promise<Message[]> {
+    async getHistory({
+        chatRoomId,
+        lastMessageId,
+        lastMessageCreatedAt,
+        limit,
+    }: HistoryDto): Promise<Message[]> {
+        const cursor =
+            lastMessageId && lastMessageCreatedAt
+                ? {
+                      createAt_id: {
+                          createAt: new Date(lastMessageCreatedAt),
+                          id: lastMessageId,
+                      },
+                  }
+                : undefined;
+
         return await this.prisma.message.findMany({
             where: { chatRoomId },
-            cursor: cursor ? { id: cursor.id } : undefined,
+            cursor,
             skip: cursor ? 1 : 0,
             take: limit,
             orderBy: [{ createAt: 'desc' }, { id: 'desc' }],
